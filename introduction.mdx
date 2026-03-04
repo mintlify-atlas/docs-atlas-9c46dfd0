@@ -1,0 +1,234 @@
+---
+title: Welcome to Fitboard
+description: Your comprehensive fitness and nutrition tracking platform
+mode: custom
+---
+
+<div className="relative overflow-hidden bg-gradient-to-b from-[#0cecf3]/10 via-white to-white dark:from-[#0cecf3]/5 dark:via-[#0f1117] dark:to-[#0f1117] py-20">
+  <div className="max-w-7xl mx-auto px-6 lg:px-8">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+      <div className="lg:col-span-7">
+        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+          Track Your Fitness Journey with Fitboard
+        </h1>
+        <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mb-8">
+          A comprehensive platform for logging meals, managing recipes, planning workout routines, and monitoring your progress. Everything you need to achieve your fitness goals in one place.
+        </p>
+        <div className="flex flex-wrap gap-4">
+          <a 
+            href="/quickstart" 
+            className="inline-flex items-center px-6 py-3 rounded-lg bg-[#0cecf3] text-gray-900 font-semibold hover:bg-[#0cecf3]/90 transition-colors no-underline"
+          >
+            Get Started
+            <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+          <a 
+            href="/api/authentication/register" 
+            className="inline-flex items-center px-6 py-3 rounded-lg border border-gray-300 dark:border-[#27272a] bg-white/10 dark:bg-white/5 text-gray-900 dark:text-white font-semibold hover:border-[#0cecf3] dark:hover:border-[#0cecf3] transition-colors no-underline"
+          >
+            API Reference
+            <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div className="lg:col-span-5 hidden lg:block">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#0cecf3]/20 to-[#7B9E1A]/20 rounded-2xl blur-3xl"></div>
+          <div className="relative bg-white dark:bg-[#1a1d27] rounded-2xl border border-gray-200 dark:border-[#27272a] p-6 shadow-xl">
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-[#0cecf3]/10 dark:bg-[#0cecf3]/20 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-[#0cecf3]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Track Progress</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Monitor your fitness journey</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-[#7B9E1A]/10 dark:bg-[#7B9E1A]/20 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-[#7B9E1A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Log Meals</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Track nutrition and macros</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-lg bg-[#1a73e8]/10 dark:bg-[#1a73e8]/20 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-[#1a73e8]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-white">Plan Routines</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Create workout schedules</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">Quick Start</h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">Get up and running with Fitboard in minutes</p>
+  
+  <Steps>
+    <Step title="Create your account">
+      Register a new account with your email and password. You can also upload a custom avatar during registration.
+      
+      ```bash
+      POST /api/v1/register
+      ```
+      
+      <Accordion title="Example Request">
+      ```json
+      {
+        "email": "user@example.com",
+        "username": "fitnessuser",
+        "password": "SecurePass123!"
+      }
+      ```
+      </Accordion>
+    </Step>
+    
+    <Step title="Authenticate and get your token">
+      Log in to receive a JWT token that you'll use for all authenticated requests.
+      
+      ```bash
+      POST /api/v1/login
+      ```
+      
+      <Note>The token is automatically stored in a secure HTTP-only cookie for web clients.</Note>
+    </Step>
+    
+    <Step title="Log your first meal">
+      Start tracking your nutrition by logging meals with detailed macro information.
+      
+      ```bash
+      POST /api/v1/meals
+      ```
+      
+      Include meal items with nutritional data like calories, protein, carbs, and fat.
+    </Step>
+    
+    <Step title="Track your progress">
+      Record body measurements, weight, and other fitness metrics to monitor your journey over time.
+      
+      ```bash
+      POST /api/v1/progress
+      ```
+      
+      <Tip>Set up regular progress check-ins to visualize your fitness trends and stay motivated.</Tip>
+    </Step>
+  </Steps>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">Explore by Feature</h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">Discover what you can do with Fitboard</p>
+  
+  <CardGroup cols={2}>
+    <Card title="Meal Tracking" icon="utensils" href="/features/meals">
+      Log daily meals with detailed nutritional information and track your macro goals
+    </Card>
+    <Card title="Recipe Management" icon="book-open" href="/features/recipes">
+      Create, save, and share your favorite recipes with nutritional breakdowns
+    </Card>
+    <Card title="Workout Routines" icon="dumbbell" href="/features/routines">
+      Design and follow personalized workout routines tailored to your fitness goals
+    </Card>
+    <Card title="Progress Analytics" icon="chart-line" href="/features/progress">
+      Monitor your fitness journey with detailed progress tracking and insights
+    </Card>
+  </CardGroup>
+</div>
+
+<div className="mt-16 mb-16 max-w-5xl mx-auto px-6">
+  <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-3">API Resources</h2>
+  <p className="text-base text-gray-600 dark:text-gray-400 mb-8">Complete API documentation for developers</p>
+  
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <a href="/api/authentication/register" className="group block rounded-2xl border border-gray-200 dark:border-[#27272a] overflow-hidden no-underline hover:border-[#0cecf3] transition-colors bg-white dark:bg-[#1a1d27]">
+      <div className="p-6">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Authentication</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Register, login, and manage user authentication with JWT tokens</p>
+        <div className="flex items-center text-sm text-[#0cecf3] group-hover:text-[#0cecf3]/80">
+          <span>View endpoints</span>
+          <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </a>
+    
+    <a href="/api/meals/list-meals" className="group block rounded-2xl border border-gray-200 dark:border-[#27272a] overflow-hidden no-underline hover:border-[#0cecf3] transition-colors bg-white dark:bg-[#1a1d27]">
+      <div className="p-6">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Meals API</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Create, update, and query meal logs with pagination and filtering</p>
+        <div className="flex items-center text-sm text-[#0cecf3] group-hover:text-[#0cecf3]/80">
+          <span>View endpoints</span>
+          <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </a>
+    
+    <a href="/api/recipes/list-recipes" className="group block rounded-2xl border border-gray-200 dark:border-[#27272a] overflow-hidden no-underline hover:border-[#0cecf3] transition-colors bg-white dark:bg-[#1a1d27]">
+      <div className="p-6">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Recipes API</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Manage your recipe collection with full CRUD operations</p>
+        <div className="flex items-center text-sm text-[#0cecf3] group-hover:text-[#0cecf3]/80">
+          <span>View endpoints</span>
+          <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </a>
+    
+    <a href="/api/routines/list-routines" className="group block rounded-2xl border border-gray-200 dark:border-[#27272a] overflow-hidden no-underline hover:border-[#0cecf3] transition-colors bg-white dark:bg-[#1a1d27]">
+      <div className="p-6">
+        <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-2">Routines API</h3>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Build and track workout routines with exercise details</p>
+        <div className="flex items-center text-sm text-[#0cecf3] group-hover:text-[#0cecf3]/80">
+          <span>View endpoints</span>
+          <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div className="mt-20 mb-16 max-w-5xl mx-auto px-6">
+  <div className="bg-gradient-to-r from-[#0cecf3]/10 to-[#7B9E1A]/10 dark:from-[#0cecf3]/5 dark:to-[#7B9E1A]/5 rounded-2xl border border-gray-200 dark:border-[#27272a] p-8 sm:p-12">
+    <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white mb-4">Ready to start your fitness journey?</h2>
+    <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-2xl">
+      Get started with Fitboard today and take control of your health and fitness goals with powerful tracking and analytics.
+    </p>
+    <a 
+      href="/quickstart" 
+      className="inline-flex items-center px-6 py-3 rounded-lg bg-[#0cecf3] text-gray-900 font-semibold hover:bg-[#0cecf3]/90 transition-colors no-underline"
+    >
+      Get Started Now
+      <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+      </svg>
+    </a>
+  </div>
+</div>

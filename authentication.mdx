@@ -1,0 +1,392 @@
+---
+title: Authentication
+description: Learn how Fitboard's JWT-based authentication system works, including token management, security, and session handling
+---
+
+Fitboard uses JSON Web Tokens (JWT) for secure authentication. This guide covers how tokens are issued, validated, and refreshed.
+
+## How Authentication Works
+
+Fitboard implements a stateless authentication system using JWT tokens signed with the HS256 algorithm. When you log in, the server generates a token containing your user ID and admin status, which you must include in subsequent API requests.
+
+### Authentication Flow
+
+<Steps>
+  <Step title="User logs in with credentials">
+    Send your email and password to the `/api/v1/login` endpoint:
+
+    ```bash
+    curl -X POST https://api.fitboard.com/api/v1/login \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "you@example.com",
+        "password": "your_password"
+      }'
+    ```
+  </Step>
+
+  <Step title="Server validates credentials">
+    The server:
+    1. Looks up the user by email (case-insensitive via `emailLower` field)
+    2. Verifies the password using bcrypt with 12 salt rounds
+    3. Returns an error if credentials are invalid
+  </Step>
+
+  <Step title="Server issues JWT token">
+    If authentication succeeds, the server generates a JWT token:
+
+    ```json
+    {
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1MDdmMWY3N2JjZjg2Y2Q3OTk0MzkwMTEiLCJpc0FkbWluIjpmYWxzZSwiaWF0IjoxNzMwODIzNjAwLCJleHAiOjE3MzE0Mjg0MDB9.signature",
+      "user": {
+        "_id": "507f1f77bcf86cd799439011",
+        "email": "you@example.com",
+        "username": "your_username",
+        "isAdmin": false,
+        "active": true
+      }
+    }
+    ```
+  </Step>
+
+  <Step title="Client stores token securely">
+    Store the token in a secure location (not localStorage - prefer httpOnly cookies or secure storage).
+  </Step>
+
+  <Step title="Client includes token in requests">
+    Include the token in the `Authorization` header:
+
+    ```bash
+    curl -X GET https://api.fitboard.com/api/v1/me \
+      -H "Authorization: Bearer YOUR_JWT_TOKEN"
+    ```
+  </Step>
+</Steps>
+
+## JWT Token Structure
+
+Fitboard's JWT tokens contain the following payload:
+
+```json
+{
+  "sub": "507f1f77bcf86cd799439011",  // User ID
+  "isAdmin": false,                   // Admin status
+  "iat": 1730823600,                   // Issued at (Unix timestamp)
+  "exp": 1731428400                    // Expiration (Unix timestamp)
+}
+```
+
+### Token Configuration
+
+- **Algorithm**: HS256 (HMAC with SHA-256)
+- **Secret**: Configured via `JWT_SECRET` environment variable
+- **Expiration**: Configurable via `JWT_EXPIRE` environment variable (default: `7d`)
+- **Issuer**: Signed by the backend service
+
+<Warning>
+  The JWT secret (`JWT_SECRET`) must be kept secure and should never be exposed. In development, it defaults to `"dev_secret_change_me"`, but must be set to a strong random value in production.
+</Warning>
+
+## Token Validation
+
+The authentication middleware (`requireAuth`) validates tokens on protected endpoints:
+
+```typescript
+// From src/middlewares/auth.ts
+export function requireAuth(
+  req: Request & { auth?: any },
+  res: Response,
+  next: NextFunction
+) {
+  const hdr = req.headers.authorization;
+  if (!hdr?.startsWith("Bearer "))
+    return res.status(401).json({ error: "Unauthorized" });
+
+  const token = hdr.slice("Bearer ".length);
+  try {
+    const secret = process.env.JWT_SECRET || "dev_secret_change_me";
+    const payload = jwt.verify(token, secret) as {
+      sub: string;
+      isAdmin?: boolean;
+    };
+    req.auth = { userId: payload.sub, isAdmin: payload.isAdmin === true };
+    next();
+  } catch {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}
+```
+
+### Validation Process
+
+1. **Extract token** - The middleware extracts the token from the `Authorization: Bearer <token>` header
+2. **Verify signature** - Uses `jsonwebtoken` to verify the token was signed with the correct secret
+3. **Check expiration** - Automatically validates the token hasn't expired
+4. **Attach user context** - Adds `req.auth` containing `userId` and `isAdmin` for downstream handlers
+
+<Note>
+  If token validation fails for any reason (expired, invalid signature, malformed), the API returns a 401 Unauthorized response.
+</Note>
+
+## Password Security
+
+Fitboard uses industry-standard password hashing with bcrypt.
+
+### Password Hashing
+
+```typescript
+// From src/models/User.ts
+UserSchema.methods.setPassword = async function (this: UserDoc, plain: string) {
+  this.passwordHash = await bcrypt.hash(plain, 12);
+};
+
+UserSchema.methods.isValidPassword = function (this: UserDoc, entered: string) {
+  return bcrypt.compare(entered, this.passwordHash);
+};
+```
+
+**Key Security Features:**
+- **Bcrypt** with 12 salt rounds for password hashing
+- **Hash validation** - Ensures stored hashes match bcrypt format: `/^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/`
+- **Selective loading** - Password hashes are never returned by default (field has `select: false`)
+- **Constant-time comparison** - bcrypt.compare prevents timing attacks
+
+### Changing Password
+
+Authenticated users can change their password:
+
+```bash
+curl -X POST https://api.fitboard.com/api/v1/change-password \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "currentPassword": "old_password",
+    "newPassword": "new_secure_password"
+  }'
+```
+
+The endpoint:
+1. Validates the current password
+2. Hashes the new password with bcrypt
+3. Saves the updated hash
+4. Returns `{ "ok": true }`
+
+<Warning>
+  Users must provide their current password to change it. This prevents unauthorized password changes even if a token is compromised.
+</Warning>
+
+## Password Reset Flow
+
+Fitboard provides a secure password reset mechanism for users who forget their password.
+
+<Steps>
+  <Step title="Request password reset">
+    Send the user's email to initiate the reset process:
+
+    ```bash
+    curl -X POST https://api.fitboard.com/api/v1/forgot-password \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "you@example.com"
+      }'
+    ```
+
+    The server:
+    1. Generates a random reset token
+    2. Hashes the token with SHA-256 and stores the hash
+    3. Sets expiration to 30 minutes from now
+    4. Sends a reset link to the user's email
+
+    <Note>
+      In development mode, the API response includes a `preview` URL and `resetLink` for testing. In production, these are not returned for security.
+    </Note>
+  </Step>
+
+  <Step title="User receives reset email">
+    The email contains a link in this format:
+
+    ```
+    https://your-frontend.com/auth/reset-password?token=RANDOM_TOKEN&email=you@example.com
+    ```
+  </Step>
+
+  <Step title="Submit new password">
+    The user submits their new password with the token:
+
+    ```bash
+    curl -X POST https://api.fitboard.com/api/v1/reset-password \
+      -H "Content-Type: application/json" \
+      -d '{
+        "token": "RANDOM_TOKEN",
+        "email": "you@example.com",
+        "newPassword": "new_secure_password"
+      }'
+    ```
+
+    The server:
+    1. Hashes the provided token with SHA-256
+    2. Finds a user matching email, token hash, and valid expiration
+    3. Sets the new password
+    4. Clears the reset token and expiration
+    5. Returns success
+  </Step>
+</Steps>
+
+### Reset Token Security
+
+- **Random generation** - Tokens are cryptographically random
+- **Hashed storage** - Only the SHA-256 hash is stored in the database
+- **Time-limited** - Tokens expire after 30 minutes
+- **Single use** - Token is cleared after successful reset
+- **Safe failure** - API returns success even if email doesn't exist (prevents email enumeration)
+
+## Session Management
+
+### Logout
+
+To log out, call the logout endpoint:
+
+```bash
+curl -X POST https://api.fitboard.com/api/v1/logout \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+The server:
+1. Clears the `auth_token` cookie (if used)
+2. Clears any server-side session data
+3. Returns `{ "ok": true }`
+
+<Note>
+  Since JWTs are stateless, logout primarily clears client-side state. The token remains technically valid until expiration, so clients should immediately discard it.
+</Note>
+
+### Token Expiration
+
+By default, tokens expire after 7 days. Configure this via the `JWT_EXPIRE` environment variable:
+
+```bash
+JWT_EXPIRE=7d    # 7 days (default)
+JWT_EXPIRE=1h    # 1 hour
+JWT_EXPIRE=30d   # 30 days
+```
+
+**Handling Expired Tokens:**
+
+When a token expires, the API returns:
+
+```json
+{
+  "error": "Invalid token"
+}
+```
+
+Clients should:
+1. Detect the 401 response
+2. Redirect the user to the login page
+3. Clear the stored token
+4. Prompt for credentials
+
+<Warning>
+  Fitboard does not currently implement refresh tokens. When a JWT expires, users must log in again to obtain a new token.
+</Warning>
+
+## User Profile Access
+
+Authenticated users can retrieve their profile:
+
+```bash
+curl -X GET https://api.fitboard.com/api/v1/me \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+Response:
+
+```json
+{
+  "_id": "507f1f77bcf86cd799439011",
+  "email": "you@example.com",
+  "emailLower": "you@example.com",
+  "username": "your_username",
+  "avatar": "https://cloudinary.com/...",
+  "isAdmin": false,
+  "active": true,
+  "createdAt": "2025-11-01T10:00:00.000Z",
+  "updatedAt": "2025-11-05T14:30:00.000Z"
+}
+```
+
+<Note>
+  The `passwordHash`, `resetTokenHash`, and `resetTokenExpiry` fields are never included in API responses for security.
+</Note>
+
+## Admin Authorization
+
+Certain endpoints require admin privileges. The `requireAdmin` middleware checks the `isAdmin` flag:
+
+```typescript
+// Example from user listing endpoint
+const caller = await User.findById(req.auth.userId).lean();
+if (!caller?.isAdmin) return res.status(403).json({ error: "Forbidden" });
+```
+
+Admin-only endpoints include:
+- `GET /api/v1/users` - List all users
+- Admin management endpoints
+- System configuration
+
+## Security Best Practices
+
+<CodeGroup>
+```javascript Client-Side Storage
+// ❌ DON'T store in localStorage
+localStorage.setItem('token', token);
+
+// ✅ DO use httpOnly cookies or secure storage
+// Let the server set httpOnly cookies automatically
+// Or use secure mobile storage (Keychain, Keystore)
+```
+
+```bash Token in Requests
+# ✅ Correct - Bearer token in Authorization header
+curl -H "Authorization: Bearer eyJhbGc..." \
+  https://api.fitboard.com/api/v1/meals
+
+# ❌ Incorrect - Token in URL (logged in server logs)
+curl https://api.fitboard.com/api/v1/meals?token=eyJhbGc...
+```
+
+```javascript Error Handling
+// ✅ DO handle auth errors gracefully
+if (response.status === 401) {
+  // Clear token and redirect to login
+  clearToken();
+  redirectToLogin();
+}
+
+// ❌ DON'T expose token in error logs
+console.error('Auth failed with token:', token); // Never log tokens!
+```
+</CodeGroup>
+
+### Recommendations
+
+1. **Rotate JWT secrets** regularly in production
+2. **Use HTTPS** exclusively to prevent token interception
+3. **Implement refresh tokens** for long-lived sessions (not currently supported)
+4. **Set appropriate token expiration** based on your security requirements
+5. **Monitor for suspicious activity** - multiple failed login attempts, token reuse patterns
+6. **Validate email addresses** during registration to prevent spam accounts
+
+## Environment Variables
+
+Key authentication configuration:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `JWT_SECRET` | `"dev_secret_change_me"` | Secret key for signing JWTs |
+| `JWT_EXPIRE` | `"7d"` | Token expiration time (e.g., "7d", "1h", "30m") |
+| `CLIENT_URL` | `"http://localhost:5173"` | Frontend URL for password reset links |
+
+<Warning>
+  Always set `JWT_SECRET` to a strong, random value in production. Never commit secrets to version control.
+</Warning>

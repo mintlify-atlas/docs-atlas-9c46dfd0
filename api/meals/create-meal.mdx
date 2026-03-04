@@ -1,0 +1,311 @@
+---
+title: "Create Meal"
+api: "POST /api/v1/meals"
+---
+
+Create a new meal entry with food items and nutritional information.
+
+## Request Body
+
+<ParamField body="date" type="string" required>
+  Date of the meal in YYYY-MM-DD format
+  ```
+  2025-11-05
+  ```
+</ParamField>
+
+<ParamField body="time" type="string">
+  Time of the meal in HH:MM format
+  ```
+  12:45
+  ```
+</ParamField>
+
+<ParamField body="mealType" type="string">
+  Type of meal. One of: `breakfast`, `lunch`, `dinner`, `snack`
+  ```
+  lunch
+  ```
+</ParamField>
+
+<ParamField body="notes" type="string">
+  Optional notes or comments about the meal
+  ```
+  Post-workout meal
+  ```
+</ParamField>
+
+<ParamField body="items" type="array" required>
+  Array of food items consumed in this meal
+  <Expandable title="MealItem Object">
+    <ParamField body="name" type="string" required>
+      Name of the food item
+      ```
+      Oatmeal
+      ```
+    </ParamField>
+    <ParamField body="amount" type="number" required>
+      Quantity of the item
+      ```
+      80
+      ```
+    </ParamField>
+    <ParamField body="unit" type="string" required>
+      Unit of measurement (e.g., g, oz, ml, cup, tbsp)
+      ```
+      g
+      ```
+    </ParamField>
+    <ParamField body="calories" type="number">
+      Total calories for this item
+      ```
+      300
+      ```
+    </ParamField>
+    <ParamField body="protein" type="number">
+      Protein content in grams
+      ```
+      12
+      ```
+    </ParamField>
+    <ParamField body="carbs" type="number">
+      Carbohydrate content in grams
+      ```
+      50
+      ```
+    </ParamField>
+    <ParamField body="fat" type="number">
+      Fat content in grams
+      ```
+      6
+      ```
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+## Response
+
+Returns the created meal object with automatically calculated totals.
+
+<ResponseField name="id" type="string">
+  Unique meal identifier
+  ```
+  meal_123
+  ```
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  User who owns this meal
+  ```
+  usr_123
+  ```
+</ResponseField>
+
+<ResponseField name="date" type="string">
+  Date of the meal
+  ```
+  2025-11-05
+  ```
+</ResponseField>
+
+<ResponseField name="time" type="string">
+  Time of the meal
+  ```
+  12:45
+  ```
+</ResponseField>
+
+<ResponseField name="mealType" type="string">
+  Type of meal
+  ```
+  lunch
+  ```
+</ResponseField>
+
+<ResponseField name="notes" type="string">
+  Optional notes
+  ```
+  Post-workout meal
+  ```
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Array of meal items (see request body for structure)
+</ResponseField>
+
+<ResponseField name="totalCalories" type="number">
+  Sum of calories from all items
+  ```
+  520
+  ```
+</ResponseField>
+
+<ResponseField name="totalProtein" type="number">
+  Sum of protein from all items (grams)
+  ```
+  35
+  ```
+</ResponseField>
+
+<ResponseField name="totalCarbs" type="number">
+  Sum of carbohydrates from all items (grams)
+  ```
+  65
+  ```
+</ResponseField>
+
+<ResponseField name="totalFat" type="number">
+  Sum of fat from all items (grams)
+  ```
+  15
+  ```
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.fitboard.com/api/v1/meals" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2025-11-05",
+    "time": "12:45",
+    "mealType": "lunch",
+    "notes": "Post-workout meal",
+    "items": [
+      {
+        "name": "Grilled Chicken",
+        "amount": 150,
+        "unit": "g",
+        "calories": 220,
+        "protein": 35,
+        "carbs": 0,
+        "fat": 8
+      },
+      {
+        "name": "Brown Rice",
+        "amount": 100,
+        "unit": "g",
+        "calories": 110,
+        "protein": 2.5,
+        "carbs": 23,
+        "fat": 0.9
+      }
+    ]
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.fitboard.com/api/v1/meals', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    date: '2025-11-05',
+    time: '12:45',
+    mealType: 'lunch',
+    notes: 'Post-workout meal',
+    items: [
+      {
+        name: 'Grilled Chicken',
+        amount: 150,
+        unit: 'g',
+        calories: 220,
+        protein: 35,
+        carbs: 0,
+        fat: 8
+      },
+      {
+        name: 'Brown Rice',
+        amount: 100,
+        unit: 'g',
+        calories: 110,
+        protein: 2.5,
+        carbs: 23,
+        fat: 0.9
+      }
+    ]
+  })
+});
+
+const meal = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.fitboard.com/api/v1/meals',
+    headers={
+        'Authorization': 'Bearer YOUR_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'date': '2025-11-05',
+        'time': '12:45',
+        'mealType': 'lunch',
+        'notes': 'Post-workout meal',
+        'items': [
+            {
+                'name': 'Grilled Chicken',
+                'amount': 150,
+                'unit': 'g',
+                'calories': 220,
+                'protein': 35,
+                'carbs': 0,
+                'fat': 8
+            },
+            {
+                'name': 'Brown Rice',
+                'amount': 100,
+                'unit': 'g',
+                'calories': 110,
+                'protein': 2.5,
+                'carbs': 23,
+                'fat': 0.9
+            }
+        ]
+    }
+)
+
+meal = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 201 - Created
+{
+  "id": "meal_456",
+  "userId": "usr_123",
+  "date": "2025-11-05",
+  "time": "12:45",
+  "mealType": "lunch",
+  "notes": "Post-workout meal",
+  "items": [
+    {
+      "name": "Grilled Chicken",
+      "amount": 150,
+      "unit": "g",
+      "calories": 220,
+      "protein": 35,
+      "carbs": 0,
+      "fat": 8
+    },
+    {
+      "name": "Brown Rice",
+      "amount": 100,
+      "unit": "g",
+      "calories": 110,
+      "protein": 2.5,
+      "carbs": 23,
+      "fat": 0.9
+    }
+  ],
+  "totalCalories": 330,
+  "totalProtein": 37.5,
+  "totalCarbs": 23,
+  "totalFat": 8.9
+}
+```
+</ResponseExample>

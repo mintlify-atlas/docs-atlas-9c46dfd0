@@ -1,80 +1,291 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get started with Fitboard in minutes - create an account, log your first meal, and track your progress
 ---
 
-## Get started in three steps
+This guide will walk you through the essential steps to start using Fitboard: creating your account, logging in, recording your first meal, and viewing your progress data.
 
-Get your documentation site running locally and make your first customization.
+## Create Your Account
 
-### Step 1: Set up your local environment
+<Steps>
+  <Step title="Register a new account">
+    Send a POST request to the registration endpoint with your credentials:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    ```bash
+    curl -X POST https://api.fitboard.com/api/v1/register \
+      -H "Content-Type: application/json" \
+      -d '{
+        "email": "you@example.com",
+        "username": "your_username",
+        "password": "your_secure_password"
+      }'
+    ```
 
-### Step 2: Deploy your changes
+    <Note>
+      You can optionally include an avatar URL in your registration request using the `avatar` field, or upload an image file using multipart/form-data.
+    </Note>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    The API will return your user profile:
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    ```json
+    {
+      "_id": "507f1f77bcf86cd799439011",
+      "email": "you@example.com",
+      "username": "your_username",
+      "avatar": "https://res.cloudinary.com/ddgf7ijdc/image/upload/v1733781971/userAvatart/Avatars/yf13f4uoy32msk195epl.jpg",
+      "isAdmin": false,
+      "active": true,
+      "createdAt": "2025-11-05T10:30:00.000Z",
+      "updatedAt": "2025-11-05T10:30:00.000Z"
+    }
+    ```
+  </Step>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+  <Step title="Verify your account is active">
+    Your account is created with `active: true` by default, so you can immediately proceed to login.
+  </Step>
+</Steps>
 
-### Step 3: Go live
+## Log In to Your Account
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+Authenticate with your credentials to receive a JWT token:
 
-## Next steps
+```bash
+curl -X POST https://api.fitboard.com/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "you@example.com",
+    "password": "your_secure_password"
+  }'
+```
 
-Now that you have your docs running, explore these key features:
+Successful login returns your token and user profile:
 
-<CardGroup cols={2}>
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "507f1f77bcf86cd799439011",
+    "email": "you@example.com",
+    "username": "your_username",
+    "avatar": "https://res.cloudinary.com/ddgf7ijdc/image/upload/v1733781971/userAvatart/Avatars/yf13f4uoy32msk195epl.jpg",
+    "isAdmin": false,
+    "active": true
+  }
+}
+```
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+<Warning>
+  Store the JWT token securely. You'll need to include it in the `Authorization` header for all subsequent API requests.
+</Warning>
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+## Log Your First Meal
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
+Now that you're authenticated, let's record your first meal. Fitboard supports tracking meals with custom nutrition data.
 
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
+<Steps>
+  <Step title="Prepare your meal data">
+    Meals in Fitboard are organized by date and slot (breakfast, lunch, dinner, or snack). Each meal includes detailed nutrition information.
+  </Step>
 
-</CardGroup>
+  <Step title="Create a meal entry">
+    Use the `/api/v1/meals` endpoint to log your meal:
+
+    ```bash
+    curl -X POST https://api.fitboard.com/api/v1/meals \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+      -d '{
+        "date": "2025-11-05",
+        "slot": "breakfast",
+        "customItem": {
+          "name": "Oatmeal with Banana",
+          "amount": 250,
+          "unit": "g",
+          "nutritionBasis": {
+            "amount": 100,
+            "unit": "g"
+          },
+          "macrosPerBasis": {
+            "kcal": 150,
+            "protein": 5.5,
+            "carbohydrate": 27,
+            "fat": 2.5
+          }
+        }
+      }'
+    ```
+
+    <Note>
+      Fitboard uses a unique constraint on `(userId, date, slot)`, so you can only have one meal per slot per day. Use PATCH to update or the `/move` endpoint to reschedule.
+    </Note>
+
+    The response includes your created meal:
+
+    ```json
+    {
+      "_id": "507f1f77bcf86cd799439012",
+      "userId": "507f1f77bcf86cd799439011",
+      "date": "2025-11-05",
+      "slot": "breakfast",
+      "customItem": {
+        "name": "Oatmeal with Banana",
+        "amount": 250,
+        "unit": "g",
+        "nutritionBasis": {
+          "amount": 100,
+          "unit": "g"
+        },
+        "macrosPerBasis": {
+          "kcal": 150,
+          "protein": 5.5,
+          "carbohydrate": 27,
+          "fat": 2.5
+        }
+      },
+      "createdAt": "2025-11-05T08:30:00.000Z",
+      "updatedAt": "2025-11-05T08:30:00.000Z"
+    }
+    ```
+  </Step>
+
+  <Step title="Alternative: Use a recipe">
+    Instead of a custom item, you can reference a saved recipe with servings:
+
+    ```json
+    {
+      "date": "2025-11-05",
+      "slot": "lunch",
+      "recipeId": "507f1f77bcf86cd799439020",
+      "servings": 1.5
+    }
+    ```
+
+    <Warning>
+      Meals must use either `customItem` OR `recipeId + servings` - they're mutually exclusive.
+    </Warning>
+  </Step>
+</Steps>
+
+## View Your Meal Data
+
+Fitboard provides multiple ways to retrieve your meal history:
+
+<CodeGroup>
+```bash Get All Meals (Paginated)
+curl -X GET "https://api.fitboard.com/api/v1/meals?page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+```bash Get Meals for a Specific Day
+curl -X GET "https://api.fitboard.com/api/v1/meals/day?date=2025-11-05" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+```bash Get Meals in a Date Range
+curl -X GET "https://api.fitboard.com/api/v1/meals/range?from=2025-11-01&to=2025-11-07" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+</CodeGroup>
+
+The response includes all your meals with their complete nutrition data:
+
+```json
+{
+  "date": "2025-11-05",
+  "items": [
+    {
+      "_id": "507f1f77bcf86cd799439012",
+      "userId": "507f1f77bcf86cd799439011",
+      "date": "2025-11-05",
+      "slot": "breakfast",
+      "customItem": {
+        "name": "Oatmeal with Banana",
+        "amount": 250,
+        "unit": "g",
+        "macrosPerBasis": {
+          "kcal": 150,
+          "protein": 5.5,
+          "carbohydrate": 27,
+          "fat": 2.5
+        }
+      }
+    }
+  ]
+}
+```
+
+## Track Your Progress
+
+Beyond meals, Fitboard helps you track body metrics and progress photos.
+
+<Steps>
+  <Step title="Create a progress entry">
+    Log your weight, measurements, and other metrics:
+
+    ```bash
+    curl -X POST https://api.fitboard.com/api/v1/progress \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+      -d '{
+        "date": "2025-11-05",
+        "weight_kg": 72.5,
+        "waist_cm": 82,
+        "body": {
+          "bodyFatPct": 18.5
+        },
+        "activity": {
+          "steps": 8500
+        },
+        "notes": "Feeling great this week!"
+      }'
+    ```
+  </Step>
+
+  <Step title="View your progress stats">
+    Get aggregated statistics over time:
+
+    ```bash
+    curl -X GET "https://api.fitboard.com/api/v1/progress/stats?from=2025-10-01&to=2025-11-05" \
+      -H "Authorization: Bearer YOUR_JWT_TOKEN"
+    ```
+
+    This returns your progress deltas and weekly averages:
+
+    ```json
+    {
+      "count": 35,
+      "range": {
+        "from": "2025-10-01",
+        "to": "2025-11-05"
+      },
+      "weight": {
+        "start": 75.0,
+        "end": 72.5,
+        "delta": -2.5,
+        "perWeek": -0.71
+      },
+      "waist": {
+        "start": 86,
+        "end": 82,
+        "delta": -4,
+        "perWeek": -1.14
+      }
+    }
+    ```
+  </Step>
+</Steps>
+
+## Next Steps
+
+Now that you've completed the basics, explore more advanced features:
+
+- **[Authentication](/authentication)** - Learn about JWT tokens, token expiration, and password management
+- **Meal Management** - Update, move, and delete meals
+- **Progress Photos** - Upload reference and posed progress photos
+- **Recipes** - Create and manage reusable recipes
+- **Routines** - Build workout routines and track exercises
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+  All API endpoints require authentication except `/register`, `/login`, `/forgot-password`, and `/reset-password`.
 </Note>

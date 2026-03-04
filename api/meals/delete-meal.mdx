@@ -1,0 +1,62 @@
+---
+title: "Delete Meal"
+api: "DELETE /api/v1/meals/{id}"
+---
+
+Permanently delete a meal by its ID.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the meal to delete
+  ```
+  meal_123
+  ```
+</ParamField>
+
+## Response
+
+Returns a 204 No Content status on successful deletion.
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://api.fitboard.com/api/v1/meals/meal_123" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.fitboard.com/api/v1/meals/meal_123', {
+  method: 'DELETE',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN'
+  }
+});
+
+// Response status: 204 (No Content)
+```
+
+```python Python
+import requests
+
+response = requests.delete(
+    'https://api.fitboard.com/api/v1/meals/meal_123',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+# Response status: 204 (No Content)
+```
+</RequestExample>
+
+<ResponseExample>
+```json 204 - No Content
+{
+  "ok": true
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Not found"
+}
+```
+</ResponseExample>

@@ -1,0 +1,215 @@
+---
+title: "Move Meal"
+api: "POST /api/v1/meals/{id}/move"
+---
+
+Move a meal to a different date, time, or meal type slot. This is useful for rescheduling meals or changing when they were consumed.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the meal to move
+  ```
+  meal_123
+  ```
+</ParamField>
+
+## Request Body
+
+At least one field must be provided.
+
+<ParamField body="date" type="string" required>
+  New date for the meal in YYYY-MM-DD format
+  ```
+  2025-11-08
+  ```
+</ParamField>
+
+<ParamField body="time" type="string">
+  New time for the meal in HH:MM format
+  ```
+  19:30
+  ```
+</ParamField>
+
+<ParamField body="mealType" type="string">
+  New meal type. One of: `breakfast`, `lunch`, `dinner`, `snack`
+  ```
+  dinner
+  ```
+</ParamField>
+
+## Response
+
+Returns the updated meal object with the new date, time, or meal type.
+
+<ResponseField name="id" type="string">
+  Unique meal identifier
+  ```
+  meal_123
+  ```
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  User who owns this meal
+  ```
+  usr_123
+  ```
+</ResponseField>
+
+<ResponseField name="date" type="string">
+  Updated date of the meal
+  ```
+  2025-11-08
+  ```
+</ResponseField>
+
+<ResponseField name="time" type="string">
+  Updated time of the meal
+  ```
+  19:30
+  ```
+</ResponseField>
+
+<ResponseField name="mealType" type="string">
+  Updated meal type
+  ```
+  dinner
+  ```
+</ResponseField>
+
+<ResponseField name="notes" type="string">
+  Notes about the meal (unchanged)
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Array of meal items (unchanged)
+  <Expandable title="MealItem Object">
+    <ResponseField name="name" type="string" required>
+      Name of the food item
+    </ResponseField>
+    <ResponseField name="amount" type="number" required>
+      Quantity of the item
+    </ResponseField>
+    <ResponseField name="unit" type="string" required>
+      Unit of measurement
+    </ResponseField>
+    <ResponseField name="calories" type="number">
+      Total calories for this item
+    </ResponseField>
+    <ResponseField name="protein" type="number">
+      Protein in grams
+    </ResponseField>
+    <ResponseField name="carbs" type="number">
+      Carbohydrates in grams
+    </ResponseField>
+    <ResponseField name="fat" type="number">
+      Fat in grams
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCalories" type="number">
+  Sum of calories from all items
+</ResponseField>
+
+<ResponseField name="totalProtein" type="number">
+  Sum of protein from all items (grams)
+</ResponseField>
+
+<ResponseField name="totalCarbs" type="number">
+  Sum of carbohydrates from all items (grams)
+</ResponseField>
+
+<ResponseField name="totalFat" type="number">
+  Sum of fat from all items (grams)
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X POST "https://api.fitboard.com/api/v1/meals/meal_123/move" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "date": "2025-11-08",
+    "time": "19:30",
+    "mealType": "dinner"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.fitboard.com/api/v1/meals/meal_123/move', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    date: '2025-11-08',
+    time: '19:30',
+    mealType: 'dinner'
+  })
+});
+
+const movedMeal = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.post(
+    'https://api.fitboard.com/api/v1/meals/meal_123/move',
+    headers={
+        'Authorization': 'Bearer YOUR_TOKEN',
+        'Content-Type': 'application/json'
+    },
+    json={
+        'date': '2025-11-08',
+        'time': '19:30',
+        'mealType': 'dinner'
+    }
+)
+
+moved_meal = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - Moved
+{
+  "id": "meal_123",
+  "userId": "usr_123",
+  "date": "2025-11-08",
+  "time": "19:30",
+  "mealType": "dinner",
+  "notes": "Pre-workout meal",
+  "items": [
+    {
+      "name": "Oatmeal",
+      "amount": 80,
+      "unit": "g",
+      "calories": 300,
+      "protein": 12,
+      "carbs": 50,
+      "fat": 6
+    }
+  ],
+  "totalCalories": 520,
+  "totalProtein": 35,
+  "totalCarbs": 65,
+  "totalFat": 15
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Not found"
+}
+```
+
+```json 409 - Conflict
+{
+  "error": "Another meal already exists for that date/slot."
+}
+```
+</ResponseExample>

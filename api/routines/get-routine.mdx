@@ -1,0 +1,214 @@
+---
+title: "Get Routine"
+api: "GET /api/v1/routines/{id}"
+description: "Retrieve a specific workout routine by ID"
+---
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier of the routine to retrieve
+</ParamField>
+
+## Response
+
+<ResponseField name="_id" type="string">
+  Unique routine identifier
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  ID of the user who owns this routine
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the routine
+</ResponseField>
+
+<ResponseField name="blocks" type="array">
+  Array of routine blocks, each containing exercises and configuration
+  
+  <ResponseField name="title" type="string">
+    Optional title for the block (e.g., "Lower", "Push", "Core")
+  </ResponseField>
+  
+  <ResponseField name="position" type="integer">
+    Order of the block within the routine
+  </ResponseField>
+  
+  <ResponseField name="exercises" type="array">
+    List of exercises in this block
+    
+    <ResponseField name="name" type="string">
+      Exercise name
+    </ResponseField>
+    
+    <ResponseField name="sets" type="integer">
+      Number of sets
+    </ResponseField>
+    
+    <ResponseField name="reps" type="string">
+      Rep scheme (e.g., "5", "8-12", "AMRAP")
+    </ResponseField>
+    
+    <ResponseField name="restSec" type="integer">
+      Rest time between sets in seconds
+    </ResponseField>
+    
+    <ResponseField name="position" type="integer">
+      Order of the exercise within the block
+    </ResponseField>
+    
+    <ResponseField name="loadKg" type="number">
+      Optional weight in kilograms
+    </ResponseField>
+    
+    <ResponseField name="rir" type="integer">
+      Reps in reserve (0-10)
+    </ResponseField>
+    
+    <ResponseField name="tempo" type="string">
+      Tempo prescription (e.g., "3-1-1")
+    </ResponseField>
+    
+    <ResponseField name="notes" type="string">
+      Additional notes or instructions
+    </ResponseField>
+    
+    <ResponseField name="videoUrl" type="string">
+      URL to instructional video
+    </ResponseField>
+    
+    <ResponseField name="cues" type="array">
+      Array of coaching cues
+    </ResponseField>
+  </ResponseField>
+  
+  <ResponseField name="exerciseType" type="string">
+    Type of exercises in this block: "strength", "hypertrophy", "conditioning", or "mobility"
+  </ResponseField>
+  
+  <ResponseField name="rounds" type="integer">
+    Number of rounds to complete for this block
+  </ResponseField>
+  
+  <ResponseField name="restBetweenExercisesSec" type="integer">
+    Rest time between exercises in seconds
+  </ResponseField>
+  
+  <ResponseField name="timer" type="object">
+    Timer configuration for the block
+    
+    <ResponseField name="mode" type="string">
+      Timer mode: "countdown", "emom", "amrap", or "tabata"
+    </ResponseField>
+    
+    <ResponseField name="seconds" type="integer">
+      Duration in seconds
+    </ResponseField>
+  </ResponseField>
+</ResponseField>
+
+<ResponseField name="tags" type="array">
+  Array of tags associated with the routine
+</ResponseField>
+
+<ResponseField name="isTemplate" type="boolean">
+  Whether this routine is marked as a template
+</ResponseField>
+
+<ResponseField name="isArchived" type="boolean">
+  Whether this routine has been archived
+</ResponseField>
+
+<ResponseField name="estimatedDurationMin" type="integer">
+  Estimated duration of the routine in minutes
+</ResponseField>
+
+<ResponseField name="lastPerformedAt" type="string">
+  ISO 8601 date when the routine was last performed
+</ResponseField>
+
+<ResponseField name="timesPerformed" type="integer">
+  Number of times this routine has been performed
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 date when the routine was created
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 date when the routine was last updated
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X GET "https://api.fitboard.app/api/v1/routines/rtn_123" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "_id": "rtn_123",
+  "userId": "usr_123",
+  "name": "Lower Body Strength",
+  "blocks": [
+    {
+      "title": "Compound Lifts",
+      "position": 1,
+      "exercises": [
+        {
+          "name": "Barbell Squat",
+          "sets": 4,
+          "reps": "8",
+          "restSec": 120,
+          "position": 1,
+          "loadKg": 80,
+          "rir": 2,
+          "tempo": "3-1-1",
+          "notes": "Keep neutral spine",
+          "cues": ["Chest up", "Knees out"]
+        },
+        {
+          "name": "Romanian Deadlift",
+          "sets": 3,
+          "reps": "10",
+          "restSec": 90,
+          "position": 2,
+          "loadKg": 60,
+          "rir": 2,
+          "notes": "Feel the hamstring stretch",
+          "cues": ["Hinge at hips", "Bar close to legs"]
+        }
+      ],
+      "exerciseType": "strength"
+    },
+    {
+      "title": "Accessories",
+      "position": 2,
+      "exercises": [
+        {
+          "name": "Leg Press",
+          "sets": 3,
+          "reps": "12-15",
+          "restSec": 60,
+          "position": 1,
+          "loadKg": 120,
+          "notes": "Full range of motion"
+        }
+      ],
+      "exerciseType": "hypertrophy"
+    }
+  ],
+  "tags": ["strength", "lower-body"],
+  "isTemplate": false,
+  "isArchived": false,
+  "estimatedDurationMin": 60,
+  "lastPerformedAt": "2026-03-01T10:00:00.000Z",
+  "timesPerformed": 12,
+  "createdAt": "2026-01-15T08:30:00.000Z",
+  "updatedAt": "2026-03-01T10:00:00.000Z"
+}
+```
+</ResponseExample>

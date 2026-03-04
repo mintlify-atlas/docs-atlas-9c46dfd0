@@ -1,0 +1,347 @@
+---
+title: User Management
+description: Administer user accounts, roles, and permissions in Fitboard
+---
+
+## Overview
+
+Fitboard's user management system provides administrators with complete control over user accounts, including role assignment, account status management, and data deletion. All operations require admin authentication.
+
+<Warning>
+  User management operations can permanently affect user data and access. Always verify the target user ID before executing destructive operations.
+</Warning>
+
+## Grant or Revoke Admin Privileges
+
+Administrators can promote users to admin status or revoke admin privileges.
+
+### Endpoint
+
+```
+PATCH /api/v1/admin/users/:id/is-admin
+```
+
+### Request Headers
+
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+```
+
+### Request Body
+
+```json
+{
+  "isAdmin": true
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `isAdmin` | boolean | Yes | `true` to grant admin privileges, `false` to revoke |
+
+### Implementation
+
+```typescript
+// From adminController.ts:12-23
+export const setIsAdmin = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    const { isAdmin } = SetAdminDto.parse(req.body);
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { isAdmin } },
+      { new: true }
+    );
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user.toSafeJSON());
+  }
+);
+```
+
+### Example Request
+
+```bash
+curl -X PATCH https://api.fitboard.com/api/v1/admin/users/usr_123/is-admin \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "isAdmin": true
+  }'
+```
+
+### Response
+
+```json
+{
+  "_id": "usr_123",
+  "email": "user@example.com",
+  "username": "fituser",
+  "isAdmin": true,
+  "active": true
+}
+```
+
+<Info>
+  The response returns the updated user object in safe JSON format (excluding sensitive fields like password hashes).
+</Info>
+
+## Deactivate User Account
+
+Deactivating a user account disables their access without permanently deleting their data. This is useful for temporary suspensions or voluntary account pauses.
+
+### Endpoint
+
+```
+PATCH /api/v1/admin/users/:id/deactivate
+```
+
+### Request Headers
+
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+Content-Type: application/json
+```
+
+### Request Body
+
+```json
+{
+  "reason": "User requested deactivation"
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `reason` | string | No | Optional reason for deactivation |
+
+### Implementation
+
+```typescript
+// From adminController.ts:25-42
+export const deactivateUser = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    if (req.params.id === req.auth!.userId) {
+      return res
+        .status(400)
+        .json({ error: "Admins cannot deactivate themselves" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: { active: false } },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+    res.json(user.toSafeJSON());
+  }
+);
+```
+
+### Self-Protection
+
+<Warning>
+  Administrators cannot deactivate their own accounts. This prevents accidental loss of admin access.
+</Warning>
+
+```typescript
+// From adminController.ts:27-31
+if (req.params.id === req.auth!.userId) {
+  return res
+    .status(400)
+    .json({ error: "Admins cannot deactivate themselves" });
+}
+```
+
+### Example Request
+
+```bash
+curl -X PATCH https://api.fitboard.com/api/v1/admin/users/usr_456/deactivate \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "reason": "Violation of terms of service"
+  }'
+```
+
+### Response
+
+```json
+{
+  "_id": "usr_456",
+  "email": "user@example.com",
+  "username": "fituser",
+  "isAdmin": false,
+  "active": false
+}
+```
+
+## Permanently Delete User
+
+Permanent deletion removes the user account and all associated data from the database. This operation is irreversible.
+
+<Warning>
+  This operation permanently deletes:
+  - User account
+  - All meals
+  - All recipes
+  - All routines
+  - All progress records
+  
+  This action cannot be undone.
+</Warning>
+
+### Endpoint
+
+```
+DELETE /api/v1/admin/users/:id
+```
+
+### Request Headers
+
+```
+Authorization: Bearer YOUR_JWT_TOKEN
+```
+
+### Implementation
+
+User deletion uses MongoDB transactions to ensure all related data is deleted atomically:
+
+```typescript
+// From adminController.ts:44-68
+export const deleteUser = asyncHandler(
+  async (req: AuthRequest, res: Response) => {
+    if (req.params.id === req.auth!.userId) {
+      return res.status(400).json({ error: "Admins cannot delete themselves" });
+    }
+
+    const session = await mongoose.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await Meal.deleteMany({ userId: req.params.id }).session(session);
+        await Recipe.deleteMany({ userId: req.params.id }).session(session);
+        await Routine.deleteMany({ userId: req.params.id }).session(session);
+        await Progress.deleteMany({ userId: req.params.id }).session(session);
+
+        const { deletedCount } = await User.deleteOne({
+          _id: req.params.id,
+        }).session(session);
+        if (!deletedCount) throw new Error("User not found");
+      });
+      res.json({ ok: true });
+    } finally {
+      session.endSession();
+    }
+  }
+);
+```
+
+### Transaction Safety
+
+The deletion process uses MongoDB sessions and transactions to ensure data integrity:
+
+1. **Atomic Operation** - All deletions occur within a single transaction
+2. **Rollback on Failure** - If any deletion fails, all changes are rolled back
+3. **Session Management** - Proper session cleanup in the finally block
+
+### Self-Protection
+
+<Warning>
+  Administrators cannot delete their own accounts. This prevents accidental loss of admin access to the system.
+</Warning>
+
+```typescript
+// From adminController.ts:46-48
+if (req.params.id === req.auth!.userId) {
+  return res.status(400).json({ error: "Admins cannot delete themselves" });
+}
+```
+
+### Example Request
+
+```bash
+curl -X DELETE https://api.fitboard.com/api/v1/admin/users/usr_789 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+### Response
+
+```json
+{
+  "ok": true
+}
+```
+
+## Route Configuration
+
+All user management routes are protected by both authentication and admin authorization middleware:
+
+```typescript
+// From admin.ts:1-7
+import { Router } from "express";
+import { requireAuth } from "../middlewares/auth";
+import { requireAdmin } from "../middlewares/requireAdmin";
+import * as crtl from "../controllers/adminController";
+
+const router = Router();
+router.use(requireAuth, requireAdmin);
+```
+
+### Route Definitions
+
+```typescript
+// From admin.ts:66-122
+router.patch("/users/:id/is-admin", crtl.setIsAdmin);
+router.patch("/users/:id/deactivate", crtl.deactivateUser);
+router.delete("/users/:id", crtl.deleteUser);
+```
+
+## Error Handling
+
+### Common Error Responses
+
+| Status Code | Error | Description |
+|-------------|-------|-------------|
+| `400` | Bad Request | Attempting to modify own account |
+| `401` | Unauthorized | Missing or invalid JWT token |
+| `403` | Forbidden | User is not an admin |
+| `404` | Not Found | Target user does not exist |
+
+### Example Error Response
+
+```json
+{
+  "error": "User not found"
+}
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Verify User IDs Before Deletion">
+    Always confirm the user ID matches the intended target before executing delete operations. Consider implementing a confirmation step in your admin UI.
+  </Accordion>
+  
+  <Accordion title="Audit Logging">
+    Consider implementing audit logs for admin actions, especially for privilege escalation and account deletion operations.
+  </Accordion>
+  
+  <Accordion title="Deactivate Before Deleting">
+    When possible, deactivate accounts first rather than immediately deleting them. This provides a recovery window if the action was taken in error.
+  </Accordion>
+  
+  <Accordion title="Role-Based Access Control">
+    For larger teams, consider implementing granular admin roles (e.g., super admin, moderator) rather than a single admin flag.
+  </Accordion>
+</AccordionGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Admin Overview" icon="shield" href="/admin/overview">
+    Learn about admin authentication and access control
+  </Card>
+  <Card title="API Reference" icon="book" href="/api-reference/admin">
+    View complete API specifications for admin endpoints
+  </Card>
+</CardGroup>

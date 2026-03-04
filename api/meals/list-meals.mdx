@@ -1,0 +1,280 @@
+---
+title: "List Meals"
+api: "GET /api/v1/meals"
+---
+
+Retrieve meals with flexible filtering options including pagination, date ranges, and specific day queries.
+
+## Endpoints
+
+### Paginated List
+
+<api>GET /api/v1/meals</api>
+
+Retrieve a paginated list of all meals for the authenticated user.
+
+#### Query Parameters
+
+<ParamField query="page" type="integer" default="1">
+  Page number (minimum: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default="20">
+  Number of items per page (minimum: 1, maximum: 100)
+</ParamField>
+
+#### Response
+
+<ResponseField name="items" type="array">
+  Array of meal objects
+  <Expandable title="Meal Object">
+    <ResponseField name="id" type="string">
+      Unique meal identifier
+      ```
+      meal_123
+      ```
+    </ResponseField>
+    <ResponseField name="userId" type="string">
+      User who owns this meal
+      ```
+      usr_123
+      ```
+    </ResponseField>
+    <ResponseField name="date" type="string">
+      Date of the meal (YYYY-MM-DD format)
+      ```
+      2025-11-05
+      ```
+    </ResponseField>
+    <ResponseField name="time" type="string">
+      Time of the meal (HH:MM format)
+      ```
+      08:30
+      ```
+    </ResponseField>
+    <ResponseField name="mealType" type="string">
+      Type of meal. One of: `breakfast`, `lunch`, `dinner`, `snack`
+      ```
+      breakfast
+      ```
+    </ResponseField>
+    <ResponseField name="notes" type="string">
+      Optional notes about the meal
+      ```
+      Pre-workout meal
+      ```
+    </ResponseField>
+    <ResponseField name="items" type="array">
+      Array of meal items consumed
+      <Expandable title="MealItem Object">
+        <ResponseField name="name" type="string" required>
+          Name of the food item
+          ```
+          Oatmeal
+          ```
+        </ResponseField>
+        <ResponseField name="amount" type="number" required>
+          Quantity of the item
+          ```
+          80
+          ```
+        </ResponseField>
+        <ResponseField name="unit" type="string" required>
+          Unit of measurement
+          ```
+          g
+          ```
+        </ResponseField>
+        <ResponseField name="calories" type="number">
+          Total calories for this item
+          ```
+          300
+          ```
+        </ResponseField>
+        <ResponseField name="protein" type="number">
+          Protein in grams
+          ```
+          12
+          ```
+        </ResponseField>
+        <ResponseField name="carbs" type="number">
+          Carbohydrates in grams
+          ```
+          50
+          ```
+        </ResponseField>
+        <ResponseField name="fat" type="number">
+          Fat in grams
+          ```
+          6
+          ```
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    <ResponseField name="totalCalories" type="number">
+      Sum of calories from all items
+      ```
+      520
+      ```
+    </ResponseField>
+    <ResponseField name="totalProtein" type="number">
+      Sum of protein from all items (grams)
+      ```
+      35
+      ```
+    </ResponseField>
+    <ResponseField name="totalCarbs" type="number">
+      Sum of carbohydrates from all items (grams)
+      ```
+      65
+      ```
+    </ResponseField>
+    <ResponseField name="totalFat" type="number">
+      Sum of fat from all items (grams)
+      ```
+      15
+      ```
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="page" type="integer">
+  Current page number
+  ```
+  1
+  ```
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Items per page
+  ```
+  20
+  ```
+</ResponseField>
+
+<ResponseField name="total" type="integer">
+  Total number of meals
+  ```
+  124
+  ```
+</ResponseField>
+
+### List by Day
+
+<api>GET /api/v1/meals/day</api>
+
+Retrieve all meals for a specific day.
+
+#### Query Parameters
+
+<ParamField query="date" type="string" required>
+  Date in YYYY-MM-DD format
+  ```
+  2025-11-05
+  ```
+</ParamField>
+
+#### Response
+
+<ResponseField name="items" type="array">
+  Array of meal objects for the specified day (see Meal Object structure above)
+</ResponseField>
+
+### List by Date Range
+
+<api>GET /api/v1/meals/range</api>
+
+Retrieve all meals between two dates (inclusive).
+
+#### Query Parameters
+
+<ParamField query="from" type="string" required>
+  Start date in YYYY-MM-DD format
+  ```
+  2025-11-01
+  ```
+</ParamField>
+
+<ParamField query="to" type="string" required>
+  End date in YYYY-MM-DD format
+  ```
+  2025-11-30
+  ```
+</ParamField>
+
+#### Response
+
+<ResponseField name="items" type="array">
+  Array of meal objects within the specified date range (see Meal Object structure above)
+</ResponseField>
+
+<RequestExample>
+```bash cURL (Paginated)
+curl -X GET "https://api.fitboard.com/api/v1/meals?page=1&limit=20" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```bash cURL (By Day)
+curl -X GET "https://api.fitboard.com/api/v1/meals/day?date=2025-11-05" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```bash cURL (By Range)
+curl -X GET "https://api.fitboard.com/api/v1/meals/range?from=2025-11-01&to=2025-11-30" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json Paginated Response
+{
+  "items": [
+    {
+      "id": "meal_123",
+      "userId": "usr_123",
+      "date": "2025-11-05",
+      "time": "08:30",
+      "mealType": "breakfast",
+      "notes": "Pre-workout meal",
+      "items": [
+        {
+          "name": "Oatmeal",
+          "amount": 80,
+          "unit": "g",
+          "calories": 300,
+          "protein": 12,
+          "carbs": 50,
+          "fat": 6
+        }
+      ],
+      "totalCalories": 520,
+      "totalProtein": 35,
+      "totalCarbs": 65,
+      "totalFat": 15
+    }
+  ],
+  "page": 1,
+  "limit": 20,
+  "total": 124
+}
+```
+
+```json By Day Response
+{
+  "items": [
+    {
+      "id": "meal_123",
+      "userId": "usr_123",
+      "date": "2025-11-05",
+      "time": "08:30",
+      "mealType": "breakfast",
+      "items": [...],
+      "totalCalories": 520,
+      "totalProtein": 35,
+      "totalCarbs": 65,
+      "totalFat": 15
+    }
+  ]
+}
+```
+</ResponseExample>

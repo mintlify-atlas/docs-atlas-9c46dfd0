@@ -1,0 +1,225 @@
+---
+title: "Update Routine"
+api: "PATCH /api/v1/routines/{id}"
+description: "Partially update an existing workout routine"
+---
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier of the routine to update
+</ParamField>
+
+## Body Parameters
+
+All fields are optional for partial updates. Only include the fields you want to change.
+
+<ParamField body="name" type="string">
+  Name of the routine (minimum 2 characters)
+</ParamField>
+
+<ParamField body="blocks" type="array">
+  Array of routine blocks containing exercises and configuration. Replaces all existing blocks.
+  
+  <ParamField body="title" type="string">
+    Optional title for the block (e.g., "Lower", "Push", "Core")
+  </ParamField>
+  
+  <ParamField body="position" type="integer" required>
+    Order of the block within the routine (minimum: 1)
+  </ParamField>
+  
+  <ParamField body="exercises" type="array" default="[]">
+    List of exercises in this block
+    
+    <ParamField body="name" type="string" required>
+      Exercise name
+    </ParamField>
+    
+    <ParamField body="sets" type="integer" required>
+      Number of sets (minimum: 1)
+    </ParamField>
+    
+    <ParamField body="reps" type="string" required>
+      Rep scheme (e.g., "5", "8-12", "AMRAP")
+    </ParamField>
+    
+    <ParamField body="restSec" type="integer" default="90">
+      Rest time between sets in seconds (minimum: 0)
+    </ParamField>
+    
+    <ParamField body="position" type="integer" required>
+      Order of the exercise within the block (minimum: 1)
+    </ParamField>
+    
+    <ParamField body="loadKg" type="number">
+      Weight in kilograms (must be positive)
+    </ParamField>
+    
+    <ParamField body="rir" type="integer">
+      Reps in reserve (0-10)
+    </ParamField>
+    
+    <ParamField body="tempo" type="string">
+      Tempo prescription (e.g., "3-1-1")
+    </ParamField>
+    
+    <ParamField body="notes" type="string">
+      Additional notes or instructions
+    </ParamField>
+    
+    <ParamField body="videoUrl" type="string">
+      URL to instructional video (must be valid URL)
+    </ParamField>
+    
+    <ParamField body="cues" type="array" default="[]">
+      Array of coaching cues
+    </ParamField>
+  </ParamField>
+  
+  <ParamField body="exerciseType" type="string">
+    Type of exercises in this block: "strength", "hypertrophy", "conditioning", or "mobility"
+  </ParamField>
+  
+  <ParamField body="rounds" type="integer">
+    Number of rounds to complete for this block (minimum: 1)
+  </ParamField>
+  
+  <ParamField body="restBetweenExercisesSec" type="integer">
+    Rest time between exercises in seconds (minimum: 0)
+  </ParamField>
+  
+  <ParamField body="timer" type="object">
+    Timer configuration for the block
+    
+    <ParamField body="mode" type="string" required>
+      Timer mode: "countdown", "emom", "amrap", or "tabata"
+    </ParamField>
+    
+    <ParamField body="seconds" type="integer" required>
+      Duration in seconds (minimum: 1)
+    </ParamField>
+  </ParamField>
+</ParamField>
+
+<ParamField body="tags" type="array">
+  Array of tags to categorize the routine
+</ParamField>
+
+<ParamField body="isTemplate" type="boolean">
+  Whether this routine should be marked as a template
+</ParamField>
+
+<ParamField body="isArchived" type="boolean">
+  Whether this routine should be archived. Consider using the dedicated `/archive` and `/unarchive` endpoints instead.
+</ParamField>
+
+<ParamField body="estimatedDurationMin" type="integer">
+  Estimated duration of the routine in minutes (minimum: 1)
+</ParamField>
+
+<ParamField body="timesPerformed" type="integer">
+  Number of times this routine has been performed (minimum: 0)
+</ParamField>
+
+## Response
+
+<ResponseField name="_id" type="string">
+  Unique routine identifier
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  ID of the user who owns this routine
+</ResponseField>
+
+<ResponseField name="name" type="string">
+  Name of the routine
+</ResponseField>
+
+<ResponseField name="blocks" type="array">
+  Array of routine blocks with exercises
+</ResponseField>
+
+<ResponseField name="tags" type="array">
+  Array of tags associated with the routine
+</ResponseField>
+
+<ResponseField name="isTemplate" type="boolean">
+  Whether this routine is marked as a template
+</ResponseField>
+
+<ResponseField name="isArchived" type="boolean">
+  Whether this routine has been archived
+</ResponseField>
+
+<ResponseField name="estimatedDurationMin" type="integer">
+  Estimated duration of the routine in minutes
+</ResponseField>
+
+<ResponseField name="lastPerformedAt" type="string">
+  ISO 8601 date when the routine was last performed
+</ResponseField>
+
+<ResponseField name="timesPerformed" type="integer">
+  Number of times this routine has been performed
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 date when the routine was created
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 date when the routine was last updated
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X PATCH "https://api.fitboard.app/api/v1/routines/rtn_123" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Lower Body Strength - Updated",
+    "tags": ["strength", "lower-body", "powerlifting"],
+    "estimatedDurationMin": 75
+  }'
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "_id": "rtn_123",
+  "userId": "usr_123",
+  "name": "Lower Body Strength - Updated",
+  "blocks": [
+    {
+      "title": "Compound Lifts",
+      "position": 1,
+      "exerciseType": "strength",
+      "exercises": [
+        {
+          "name": "Barbell Squat",
+          "sets": 4,
+          "reps": "8",
+          "restSec": 120,
+          "position": 1,
+          "loadKg": 80,
+          "rir": 2,
+          "tempo": "3-1-1",
+          "notes": "Keep neutral spine",
+          "cues": ["Chest up", "Knees out"]
+        }
+      ]
+    }
+  ],
+  "tags": ["strength", "lower-body", "powerlifting"],
+  "isTemplate": false,
+  "isArchived": false,
+  "estimatedDurationMin": 75,
+  "lastPerformedAt": "2026-03-01T10:00:00.000Z",
+  "timesPerformed": 12,
+  "createdAt": "2026-01-15T08:30:00.000Z",
+  "updatedAt": "2026-03-04T10:30:00.000Z"
+}
+```
+</ResponseExample>

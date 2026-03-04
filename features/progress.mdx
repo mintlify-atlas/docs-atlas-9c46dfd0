@@ -1,0 +1,641 @@
+---
+title: Progress Tracking
+description: Monitor your fitness journey with comprehensive tracking of weight, body measurements, photos, wellness metrics, and performance trends
+---
+
+## Overview
+
+Fitboard's progress tracking system provides a complete picture of your fitness journey. Track weight, body measurements, progress photos, vitals, wellness metrics, and training activity in one unified platform.
+
+<CardGroup cols={2}>
+  <Card title="Body Metrics" icon="weight-scale">
+    Track weight, body fat %, and circumference measurements
+  </Card>
+  <Card title="Progress Photos" icon="camera">
+    Upload posed photos and reference comparisons
+  </Card>
+  <Card title="Wellness Tracking" icon="heart-pulse">
+    Monitor sleep, energy, stress, and recovery
+  </Card>
+  <Card title="Trends & Analytics" icon="chart-line">
+    Visualize changes over time with statistics
+  </Card>
+</CardGroup>
+
+## Creating Progress Entries
+
+### Basic Entry Structure
+
+Each progress entry represents a snapshot in time:
+
+```typescript
+{
+  "date": "2026-03-04",
+  "timeOfDay": "morning",
+  "unitSystem": "metric",
+  "source": "manual",
+  
+  "weight_kg": 82.5,
+  "waist_cm": 86,
+  
+  "body": {
+    "bodyFatPct": 15.2,
+    "bodyFatMethod": "caliper",
+    "chest_cm": 104,
+    "hip_cm": 98,
+    "thigh_cm": 58,
+    "arm_cm": 38,
+    "neck_cm": 39
+  },
+  
+  "vitals": {
+    "rhr_bpm": 58,
+    "bp_systolic": 120,
+    "bp_diastolic": 75,
+    "spo2_pct": 98
+  },
+  
+  "wellness": {
+    "sleep_hours": 7.5,
+    "energy_1to5": 4,
+    "stress_1to5": 2,
+    "soreness_1to5": 3
+  },
+  
+  "activity": {
+    "steps": 8500,
+    "timeTrainedMin": 75,
+    "workoutId": "65f8a2b3c4d5e6f7g8h9i0j1",
+    "caloriesBurned_est": 450
+  },
+  
+  "notes": "Feeling strong, sleeping well",
+  "tags": ["check-in", "progress-week"]
+}
+```
+
+**Workflow:**
+
+1. Navigate to **Progress**
+2. Click **Add Entry**
+3. Select date and time of day
+4. Fill in relevant metrics (not all required)
+5. Add notes if desired
+6. Click **Save**
+
+<Info>
+Only one entry per date/timeOfDay combination is allowed. To update an existing entry, use the edit function or upsert endpoint.
+</Info>
+
+## Measurement Categories
+
+### Weight & Basic Measurements
+
+Core body metrics tracked at the top level:
+
+- **weight_kg**: Body weight in kilograms
+- **waist_cm**: Waist circumference in centimeters
+
+<Tip>
+For consistency, weigh yourself at the same time each day (ideally morning after using bathroom, before eating) wearing similar clothing.
+</Tip>
+
+### Body Composition
+
+Detailed body measurements in the `body` object:
+
+```typescript
+"body": {
+  "bodyFatPct": 15.2,           // 1-75%
+  "bodyFatMethod": "caliper",   // bmi | impedance | caliper | scan
+  "chest_cm": 104,
+  "hip_cm": 98,
+  "thigh_cm": 58,
+  "arm_cm": 38,
+  "neck_cm": 39,
+  "estimatedLeanMass_kg": 70.3
+}
+```
+
+**Measurement Locations:**
+
+- **Chest**: Across nipple line at peak inhalation
+- **Waist**: Around belly button, relaxed
+- **Hips**: Widest point around glutes
+- **Thigh**: Midpoint between knee and hip crease
+- **Arm**: Midpoint between shoulder and elbow, relaxed
+- **Neck**: Below Adam's apple
+
+**Body Fat Methods:**
+
+- `bmi`: BMI calculation (least accurate)
+- `impedance`: Bioelectrical impedance scale
+- `caliper`: Skinfold caliper measurement
+- `scan`: DEXA or bod pod scan (most accurate)
+
+<Warning>
+Different measurement methods yield different body fat percentages. Stick with one method for consistent tracking, even if the absolute number is imperfect.
+</Warning>
+
+### Vitals
+
+Health metrics in the `vitals` object:
+
+```typescript
+"vitals": {
+  "rhr_bpm": 58,          // Resting heart rate
+  "bp_systolic": 120,     // Blood pressure (top number)
+  "bp_diastolic": 75,     // Blood pressure (bottom number)
+  "spo2_pct": 98          // Blood oxygen saturation (50-100%)
+}
+```
+
+<Info>
+Measure resting heart rate first thing in the morning while still in bed for most accurate baseline.
+</Info>
+
+### Wellness Metrics
+
+Recovery and lifestyle factors in the `wellness` object:
+
+```typescript
+"wellness": {
+  "sleep_hours": 7.5,      // 0-24 hours
+  "energy_1to5": 4,        // 1=very low, 5=very high
+  "stress_1to5": 2,        // 1=very low, 5=very high
+  "soreness_1to5": 3       // 1=none, 5=very sore
+}
+```
+
+**Rating Scales:**
+
+| Rating | Energy | Stress | Soreness |
+|--------|--------|--------|----------|
+| 1 | Exhausted | Relaxed | No soreness |
+| 2 | Low | Slightly stressed | Mild soreness |
+| 3 | Moderate | Moderately stressed | Moderate soreness |
+| 4 | High | Stressed | Quite sore |
+| 5 | Excellent | Very stressed | Extremely sore |
+
+<Tip>
+Track wellness metrics daily to identify patterns. Low energy + high stress + poor sleep often indicates need for a deload week.
+</Tip>
+
+### Activity Tracking
+
+Training and movement data in the `activity` object:
+
+```typescript
+"activity": {
+  "steps": 8500,
+  "timeTrainedMin": 75,
+  "workoutId": "65f8a2b3c4d5e6f7g8h9i0j1",  // Link to routine
+  "vo2max": 52.3,
+  "caloriesBurned_est": 450
+}
+```
+
+**Linking Workouts:**
+
+Set `workoutId` to connect progress entries with specific routines. This enables analysis of how different training affects your progress.
+
+## Progress Photos
+
+### Posed Photos
+
+Upload standardized progress photos in three poses:
+
+- **Front**: Facing camera, arms at sides
+- **Side**: Profile view, arms at sides  
+- **Back**: Back to camera, arms at sides
+
+**Upload Workflow:**
+
+1. Open progress entry
+2. Navigate to **Photos** section
+3. Click **Upload Posed Photos**
+4. Select pose type (front/side/back)
+5. Upload image
+6. Add optional notes and lighting info
+7. Click **Save**
+
+**API Endpoint:**
+
+```http
+POST /api/progress/:id/photos/posed
+Content-Type: multipart/form-data
+
+front: [file]
+side: [file]
+back: [file]
+frontLighting: "natural"
+frontNotes: "Morning, fasted"
+```
+
+Posed photos replace existing photos for the same pose, maintaining one current photo per pose.
+
+<Tip>
+Take progress photos under consistent conditions:
+- Same location and background
+- Same lighting (natural daylight is best)
+- Same time of day (morning, fasted)
+- Same clothing (or none)
+- Same camera distance and angle
+</Tip>
+
+### Reference Photos
+
+Set start and comparison reference photos:
+
+```typescript
+{
+  "startPhoto": {
+    "url": "https://...",
+    "publicId": "cloudinary_id",
+    "notes": "Starting point - Jan 1, 2026",
+    "capturedAt": "2026-01-01"
+  },
+  "comparePhoto": {
+    "url": "https://...",
+    "publicId": "cloudinary_id",
+    "notes": "Mid-program check-in",
+    "capturedAt": "2026-02-01"
+  }
+}
+```
+
+**Workflow:**
+
+1. Open progress entry
+2. Click **Set Reference Photos**
+3. Upload start photo (typically from day 1)
+4. Upload compare photo (typically from a milestone)
+5. Add capture dates and notes
+6. Click **Save**
+
+**In the UI (`client/src/components/progress/ProgressFeatures.tsx:66`):**
+
+Reference photos display side-by-side for visual comparison.
+
+**API Endpoint:**
+
+```http
+POST /api/progress/:id/reference-photos
+Content-Type: multipart/form-data
+
+start: [file]
+compare: [file]
+startNotes: "Day 1"
+compareCapturedAt: "2026-02-01"
+```
+
+### Managing Photos
+
+**Remove Reference Photo:**
+
+```http
+DELETE /api/progress/:id/reference-photos/:which
+
+// :which = "start" | "compare"
+```
+
+**Remove Individual Photo:**
+
+```http
+DELETE /api/progress/:id/photos/:photoId
+
+// :photoId = URL-encoded photo URL or Cloudinary publicId
+```
+
+<Warning>
+Deleting photos from Cloudinary is permanent and cannot be undone. Photos are removed from the progress entry and from cloud storage.
+</Warning>
+
+## Querying Progress Data
+
+### List All Entries
+
+Retrieve paginated progress data:
+
+```
+GET /api/progress?page=1&limit=20&sort=-date&from=2026-01-01&to=2026-03-04
+```
+
+Query parameters:
+- `page`: Page number (default: 1)
+- `limit`: Items per page (max: 100)
+- `from` / `to`: Date range filter (YYYY-MM-DD)
+- `sort`: `date`, `-date`, `createdAt`, `-createdAt`
+
+Response:
+```json
+{
+  "page": 1,
+  "limit": 20,
+  "total": 45,
+  "items": [ /* progress entries */ ],
+  "hasMore": true
+}
+```
+
+### Get by Date
+
+Retrieve entry for a specific date:
+
+```
+GET /api/progress/by-date/2026-03-04
+```
+
+Returns the progress entry for that date or 404 if none exists.
+
+### Get by ID
+
+Retrieve a specific entry:
+
+```
+GET /api/progress/:id
+```
+
+## Analytics & Trends
+
+### Progress Statistics
+
+Get aggregate stats over a date range:
+
+```
+GET /api/progress/stats?from=2026-01-01&to=2026-03-04
+```
+
+Response:
+```json
+{
+  "count": 45,
+  "range": {
+    "from": "2026-01-01",
+    "to": "2026-03-04"
+  },
+  "weight": {
+    "start": 85.2,
+    "end": 82.5,
+    "delta": -2.7,
+    "perWeek": -0.42
+  },
+  "waist": {
+    "start": 92,
+    "end": 86,
+    "delta": -6,
+    "perWeek": -0.93
+  }
+}
+```
+
+**Use Cases:**
+
+- Assess rate of weight loss/gain
+- Verify you're hitting weekly targets
+- Present progress data to coaches
+- Identify plateaus or rapid changes
+
+<Tip>
+Aim for 0.5-1% body weight change per week for sustainable fat loss or muscle gain. Use stats to verify you're in the target range.
+</Tip>
+
+### Trend Visualization
+
+**In the UI:**
+
+The progress dashboard displays:
+
+- **Weight trend chart**: Daily weight with moving average
+- **Body measurement charts**: Track changes in circumferences
+- **Wellness radar chart**: Visualize sleep, energy, stress, soreness
+- **Photo timeline**: Compare photos across dates
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Track consistently, not obsessively">
+    Take measurements weekly (e.g., every Monday morning). Daily fluctuations are normal and can create stress if over-monitored.
+  </Accordion>
+  
+  <Accordion title="Use morning weigh-ins for consistency">
+    Weigh yourself first thing in the morning, after using the bathroom, before eating or drinking. This minimizes variability from food, hydration, and time of day.
+  </Accordion>
+  
+  <Accordion title="Focus on trends, not individual data points">
+    A single high or low measurement doesn't define progress. Look at 2-4 week trends using the statistics endpoint.
+  </Accordion>
+  
+  <Accordion title="Take progress photos monthly">
+    Weekly photos are excessive; monthly photos clearly show visual changes without creating obsessive behavior.
+  </Accordion>
+  
+  <Accordion title="Track wellness metrics daily">
+    Unlike body metrics, wellness (sleep, energy, stress, soreness) should be logged daily to identify recovery patterns.
+  </Accordion>
+  
+  <Accordion title="Link workouts to progress entries">
+    Use the `workoutId` field to connect training with progress. Analyze which routines correlate with best results.
+  </Accordion>
+  
+  <Accordion title="Add context in notes">
+    Include relevant info like "post-vacation," "low water intake," or "end of diet phase" to explain outliers.
+  </Accordion>
+</AccordionGroup>
+
+## Unit Systems
+
+Fitboard supports metric and imperial units:
+
+```typescript
+{
+  "unitSystem": "metric",  // or "imperial"
+  "weight_kg": 82.5,       // Use lbs for imperial
+  "waist_cm": 86           // Use inches for imperial
+}
+```
+
+<Info>
+Regardless of display preference, all data is stored in metric units (kg, cm) in the database. The UI converts to imperial when `unitSystem` is set to "imperial".
+</Info>
+
+## Data Sources
+
+Track where data comes from:
+
+- **manual**: Hand-entered by user
+- **device**: Imported from smart scale, fitness tracker, etc.
+- **import**: Bulk imported from CSV or other platform
+
+This helps identify potential measurement inconsistencies.
+
+## Editing & Updating
+
+### Update Entry by ID
+
+```http
+PATCH /api/progress/:id
+Content-Type: application/json
+
+{
+  "weight_kg": 82.3,
+  "notes": "Updated measurement"
+}
+```
+
+Partial updates are supported - only include fields you want to change.
+
+### Upsert by Date
+
+Create or update entry for a specific date:
+
+```http
+PUT /api/progress/by-date/2026-03-04
+Content-Type: application/json
+
+{
+  "weight_kg": 82.5,
+  "waist_cm": 86
+}
+```
+
+If an entry exists for that date, it's updated. Otherwise, a new entry is created.
+
+### Delete Entry
+
+```http
+DELETE /api/progress/:id
+```
+
+<Warning>
+Deleting a progress entry also removes associated photos from Cloudinary. This action is permanent.
+</Warning>
+
+## Data Structure Reference
+
+Complete progress model from `backend/src/models/Progress.ts:18`:
+
+```typescript
+interface IProgress {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  date: string;  // YYYY-MM-DD
+  timeOfDay: "morning" | "evening" | "other";
+  timezone?: string;
+  unitSystem: "metric" | "imperial";
+  source: "manual" | "device" | "import";
+  
+  weight_kg?: number;
+  waist_cm?: number;
+  
+  body?: {
+    bodyFatPct?: number;  // 1-75
+    bodyFatMethod?: "bmi" | "impedance" | "caliper" | "scan";
+    chest_cm?: number;
+    hip_cm?: number;
+    thigh_cm?: number;
+    arm_cm?: number;
+    neck_cm?: number;
+    estimatedLeanMass_kg?: number;
+  };
+  
+  vitals?: {
+    rhr_bpm?: number;
+    bp_systolic?: number;
+    bp_diastolic?: number;
+    spo2_pct?: number;  // 50-100
+  };
+  
+  wellness?: {
+    sleep_hours?: number;  // 0-24
+    energy_1to5?: number;  // 1-5
+    stress_1to5?: number;  // 1-5
+    soreness_1to5?: number;  // 1-5
+  };
+  
+  activity?: {
+    steps?: number;
+    timeTrainedMin?: number;
+    vo2max?: number;
+    workoutId?: Types.ObjectId;  // Links to routine
+    caloriesBurned_est?: number;
+  };
+  
+  notes?: string;
+  
+  photos: {
+    url: string;
+    publicId?: string;
+    pose?: "front" | "side" | "back";
+    lighting?: "natural" | "artificial" | "unknown";
+    notes?: string;
+  }[];
+  
+  startPhoto?: {
+    url: string;
+    publicId?: string;
+    notes?: string;
+    capturedAt?: string;
+  };
+  
+  comparePhoto?: {
+    url: string;
+    publicId?: string;
+    notes?: string;
+    capturedAt?: string;
+  };
+  
+  tags: string[];
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date | null;
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Error: 'A progress entry for this date already exists'">
+    Each date can only have one entry per `timeOfDay`. Either:
+    - Choose a different time of day (morning/evening/other)
+    - Edit the existing entry instead of creating new
+    - Use the upsert endpoint to update if exists
+  </Accordion>
+  
+  <Accordion title="Photos not uploading">
+    Verify:
+    - File is a valid image format (JPG, PNG, WebP)
+    - File size is under upload limit (typically 10MB)
+    - You're using the correct multipart form endpoint
+    - Progress entry exists before uploading photos
+  </Accordion>
+  
+  <Accordion title="Statistics showing unexpected values">
+    Check:
+    - Date range includes enough entries (need at least 2)
+    - Data fields you're analyzing are populated
+    - Unit system is consistent across entries
+    - No outlier measurements skewing averages
+  </Accordion>
+  
+  <Accordion title="Reference photos not displaying">
+    Ensure:
+    - Photos were uploaded successfully (check response)
+    - URLs are accessible (not behind authentication)
+    - Progress entry ID is correct
+  </Accordion>
+</AccordionGroup>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Routines" icon="dumbbell" href="/features/routines">
+    Link workouts to progress entries for comprehensive tracking
+  </Card>
+  <Card title="Meals" icon="utensils" href="/features/meals">
+    See how nutrition correlates with progress
+  </Card>
+  <Card title="Macro Goals" icon="bullseye" href="/features/macro-goals">
+    Adjust nutrition targets based on progress trends
+  </Card>
+</CardGroup>

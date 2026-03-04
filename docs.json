@@ -1,122 +1,121 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Fitboard",
+  "theme": "palm",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#0cecf3"
   },
-  "favicon": "/favicon.svg",
+  "favicon": "https://media.brand.dev/4f7e98a5-7db9-4062-ad44-5deac6bb0153.png",
+  "logo": {
+    "light": "/logo-light.png",
+    "dark": "/logo-dark.png"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/Yamil-Pedroso/Fitboard"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/Yamil-Pedroso/Fitboard"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
-              "index",
+              "introduction",
               "quickstart",
-              "development"
+              "authentication"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Features",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "features/meals",
+              "features/recipes",
+              "features/routines",
+              "features/progress"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Admin",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
-            ]
-          },
-          {
-            "group": "AI tools",
-            "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "admin/overview",
+              "admin/user-management"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "API Reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Authentication",
             "pages": [
-              "api-reference/introduction"
+              "api/authentication/register",
+              "api/authentication/login",
+              "api/authentication/logout",
+              "api/authentication/password-reset"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Users",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "api/users/get-profile",
+              "api/users/update-profile",
+              "api/users/change-password",
+              "api/users/list-users"
+            ]
+          },
+          {
+            "group": "Meals",
+            "pages": [
+              "api/meals/list-meals",
+              "api/meals/create-meal",
+              "api/meals/get-meal",
+              "api/meals/update-meal",
+              "api/meals/delete-meal",
+              "api/meals/move-meal"
+            ]
+          },
+          {
+            "group": "Recipes",
+            "pages": [
+              "api/recipes/list-recipes",
+              "api/recipes/create-recipe",
+              "api/recipes/get-recipe",
+              "api/recipes/update-recipe",
+              "api/recipes/delete-recipe"
+            ]
+          },
+          {
+            "group": "Routines",
+            "pages": [
+              "api/routines/list-routines",
+              "api/routines/create-routine",
+              "api/routines/get-routine",
+              "api/routines/update-routine",
+              "api/routines/delete-routine"
+            ]
+          },
+          {
+            "group": "Progress",
+            "pages": [
+              "api/progress/list-progress",
+              "api/progress/create-progress",
+              "api/progress/get-progress",
+              "api/progress/update-progress",
+              "api/progress/delete-progress"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

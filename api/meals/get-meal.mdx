@@ -1,0 +1,207 @@
+---
+title: "Get Meal"
+api: "GET /api/v1/meals/{id}"
+---
+
+Retrieve a specific meal by its ID.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  The unique identifier of the meal
+  ```
+  meal_123
+  ```
+</ParamField>
+
+## Response
+
+<ResponseField name="id" type="string">
+  Unique meal identifier
+  ```
+  meal_123
+  ```
+</ResponseField>
+
+<ResponseField name="userId" type="string">
+  User who owns this meal
+  ```
+  usr_123
+  ```
+</ResponseField>
+
+<ResponseField name="date" type="string">
+  Date of the meal (YYYY-MM-DD format)
+  ```
+  2025-11-05
+  ```
+</ResponseField>
+
+<ResponseField name="time" type="string">
+  Time of the meal (HH:MM format)
+  ```
+  08:30
+  ```
+</ResponseField>
+
+<ResponseField name="mealType" type="string">
+  Type of meal. One of: `breakfast`, `lunch`, `dinner`, `snack`
+  ```
+  breakfast
+  ```
+</ResponseField>
+
+<ResponseField name="notes" type="string">
+  Optional notes about the meal
+  ```
+  Pre-workout meal
+  ```
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Array of meal items consumed
+  <Expandable title="MealItem Object">
+    <ResponseField name="name" type="string" required>
+      Name of the food item
+      ```
+      Oatmeal
+      ```
+    </ResponseField>
+    <ResponseField name="amount" type="number" required>
+      Quantity of the item
+      ```
+      80
+      ```
+    </ResponseField>
+    <ResponseField name="unit" type="string" required>
+      Unit of measurement
+      ```
+      g
+      ```
+    </ResponseField>
+    <ResponseField name="calories" type="number">
+      Total calories for this item
+      ```
+      300
+      ```
+    </ResponseField>
+    <ResponseField name="protein" type="number">
+      Protein in grams
+      ```
+      12
+      ```
+    </ResponseField>
+    <ResponseField name="carbs" type="number">
+      Carbohydrates in grams
+      ```
+      50
+      ```
+    </ResponseField>
+    <ResponseField name="fat" type="number">
+      Fat in grams
+      ```
+      6
+      ```
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="totalCalories" type="number">
+  Sum of calories from all items
+  ```
+  520
+  ```
+</ResponseField>
+
+<ResponseField name="totalProtein" type="number">
+  Sum of protein from all items (grams)
+  ```
+  35
+  ```
+</ResponseField>
+
+<ResponseField name="totalCarbs" type="number">
+  Sum of carbohydrates from all items (grams)
+  ```
+  65
+  ```
+</ResponseField>
+
+<ResponseField name="totalFat" type="number">
+  Sum of fat from all items (grams)
+  ```
+  15
+  ```
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.fitboard.com/api/v1/meals/meal_123" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.fitboard.com/api/v1/meals/meal_123', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN'
+  }
+});
+
+const meal = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.fitboard.com/api/v1/meals/meal_123',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+meal = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 - OK
+{
+  "id": "meal_123",
+  "userId": "usr_123",
+  "date": "2025-11-05",
+  "time": "08:30",
+  "mealType": "breakfast",
+  "notes": "Pre-workout meal",
+  "items": [
+    {
+      "name": "Oatmeal",
+      "amount": 80,
+      "unit": "g",
+      "calories": 300,
+      "protein": 12,
+      "carbs": 50,
+      "fat": 6
+    },
+    {
+      "name": "Banana",
+      "amount": 1,
+      "unit": "medium",
+      "calories": 105,
+      "protein": 1.3,
+      "carbs": 27,
+      "fat": 0.4
+    }
+  ],
+  "totalCalories": 520,
+  "totalProtein": 35,
+  "totalCarbs": 65,
+  "totalFat": 15
+}
+```
+
+```json 404 - Not Found
+{
+  "error": "Not found"
+}
+```
+</ResponseExample>

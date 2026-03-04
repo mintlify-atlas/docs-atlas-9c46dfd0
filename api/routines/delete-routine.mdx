@@ -1,0 +1,40 @@
+---
+title: "Delete Routine"
+api: "DELETE /api/v1/routines/{id}"
+description: "Permanently delete a workout routine"
+---
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier of the routine to delete
+</ParamField>
+
+## Response
+
+Returns a success object confirming the deletion.
+
+<ResponseField name="ok" type="boolean">
+  Indicates successful deletion (always true when successful)
+</ResponseField>
+
+<RequestExample>
+```bash
+curl -X DELETE "https://api.fitboard.app/api/v1/routines/rtn_123" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+</RequestExample>
+
+<ResponseExample>
+```json
+{
+  "ok": true
+}
+```
+</ResponseExample>
+
+## Notes
+
+- This operation is permanent and cannot be undone
+- If you want to keep the routine but remove it from active use, consider using the archive endpoint instead: `POST /api/v1/routines/{id}/archive`
+- Returns 404 if the routine doesn't exist or doesn't belong to the authenticated user

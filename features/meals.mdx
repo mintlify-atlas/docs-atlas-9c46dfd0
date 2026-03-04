@@ -1,0 +1,396 @@
+---
+title: Meal Tracking
+description: Log meals, track macros, and manage your daily nutrition with Fitboard's comprehensive meal tracking system
+---
+
+## Overview
+
+Fitboard's meal tracking system helps you log your daily meals, monitor macro and micronutrient intake, and maintain consistency with your nutrition goals. Track meals from recipes or log custom food items with precise nutritional data.
+
+<CardGroup cols={2}>
+  <Card title="Recipe-Based Meals" icon="book">
+    Log meals using your saved recipes with automatic macro calculations
+  </Card>
+  <Card title="Custom Items" icon="apple-whole">
+    Track any food with flexible unit conversions and custom nutritional data
+  </Card>
+  <Card title="Meal Slots" icon="clock">
+    Organize meals by breakfast, lunch, dinner, and snacks
+  </Card>
+  <Card title="Move Meals" icon="arrows-up-down">
+    Easily reschedule meals to different days or time slots
+  </Card>
+</CardGroup>
+
+## Meal Types & Slots
+
+Every meal is assigned to one of four time-based slots:
+
+- **Breakfast** - Morning meals
+- **Lunch** - Midday meals  
+- **Dinner** - Evening meals
+- **Snack** - Any time snacks and supplements
+
+<Info>
+Each slot can only contain one meal per day. To add multiple items to a slot, combine them into a single recipe or use the move feature to reassign.
+</Info>
+
+## Creating Meals
+
+### Recipe-Based Meals
+
+Log meals using your saved recipes. Macros are automatically calculated based on servings:
+
+```json
+{
+  "date": "2026-03-04",
+  "slot": "breakfast",
+  "recipeId": "65f8a2b3c4d5e6f7g8h9i0j1",
+  "servings": 1.5
+}
+```
+
+**Workflow:**
+
+1. Navigate to **Meals** in the main menu
+2. Click **Add Meal**
+3. Select **From Recipe** mode
+4. Choose the date and meal slot
+5. Select your recipe from the dropdown
+6. Adjust servings (supports decimals like 0.5, 1.5)
+7. Click **Save**
+
+<Tip>
+Increase servings to 1.5 or 2 for larger portions without manually recalculating macros.
+</Tip>
+
+### Custom Food Items
+
+Log any food item with custom nutritional information:
+
+```typescript
+{
+  "date": "2026-03-04",
+  "slot": "lunch",
+  "customItem": {
+    "name": "Grilled Chicken Breast",
+    "amount": 200,
+    "unit": "g",
+    "nutritionBasis": {
+      "amount": 100,
+      "unit": "g"
+    },
+    "macrosPerBasis": {
+      "kcal": 165,
+      "protein": 31,
+      "carbohydrate": 0,
+      "fat": 3.6
+    }
+  }
+}
+```
+
+**Understanding Nutrition Basis:**
+
+The `nutritionBasis` defines the reference amount for your macro data. If nutrition facts are "per 100g", set:
+- `nutritionBasis.amount`: 100
+- `nutritionBasis.unit`: "g"
+
+Fitboard automatically scales macros based on the actual `amount` you consumed.
+
+**Workflow:**
+
+1. Click **Add Meal** → **Custom Item**
+2. Enter the food name
+3. Set the amount you consumed (e.g., 200)
+4. Choose unit: `g` (grams), `ml` (milliliters), or `unit` (pieces)
+5. Define nutrition basis (usually 100g or 100ml from food labels)
+6. Enter macros per basis amount
+7. Click **Save**
+
+<Accordion title="Advanced: Unit Conversions">
+For items measured in units (e.g., "1 banana"), you can specify:
+
+- **gramsPerUnit**: Weight of one unit (e.g., 120g per banana)
+- **densityGPerMl**: Density for ml→g conversion (e.g., 1.05 for milk)
+
+This enables flexible tracking regardless of how you measure foods.
+</Accordion>
+
+## Querying Meals
+
+### View Meals by Day
+
+Retrieve all meals for a specific date:
+
+```
+GET /api/meals/by-day?date=2026-03-04
+```
+
+Response:
+```json
+{
+  "date": "2026-03-04",
+  "items": [
+    {
+      "_id": "...",
+      "slot": "breakfast",
+      "recipeId": "...",
+      "servings": 1,
+      "date": "2026-03-04"
+    },
+    {
+      "_id": "...",
+      "slot": "lunch",
+      "customItem": { /* ... */ },
+      "date": "2026-03-04"
+    }
+  ]
+}
+```
+
+**In the UI:**
+
+The dashboard displays your current day's meals organized by slot with real-time macro totals.
+
+### View Meals by Date Range
+
+Analyze nutrition trends over time:
+
+```
+GET /api/meals/range?from=2026-03-01&to=2026-03-07
+```
+
+Response includes all meals within the date range, sorted chronologically.
+
+**Use Cases:**
+- Weekly nutrition review
+- Identifying eating patterns
+- Preparing for check-ins with coaches
+
+### Search & Filter
+
+Find meals with advanced filtering:
+
+```
+GET /api/meals?q=chicken&slot=lunch&from=2026-03-01&limit=20&page=1
+```
+
+Query parameters:
+- `q`: Search by food name (searches `customItem.name`)
+- `slot`: Filter by meal slot
+- `from` / `to`: Date range
+- `sort`: Order by date or creation time
+- `page` / `limit`: Pagination
+
+## Macro Tracking
+
+### Viewing Daily Totals
+
+Fitboard automatically calculates daily macro totals from all logged meals. The dashboard shows:
+
+- Total calories (kcal)
+- Protein (g)
+- Carbohydrates (g)
+- Fat (g)
+- Progress toward your macro goals
+
+<Info>
+Macro goals are set in your user profile and can be configured when you update your profile settings.
+</Info>
+
+### Understanding Calculations
+
+For **recipe-based meals**:
+```
+Actual Macros = (Recipe Total Macros / Recipe Servings) × Logged Servings
+```
+
+For **custom items**:
+```
+Actual Macros = (Macros Per Basis / Basis Amount) × Consumed Amount
+```
+
+Example: 200g chicken where nutrition is per 100g:
+```
+Protein = (31g / 100g) × 200g = 62g
+```
+
+## Moving Meals
+
+Reschedule meals to different days or time slots:
+
+```json
+{
+  "date": "2026-03-05",
+  "slot": "dinner"
+}
+```
+
+**Workflow:**
+
+1. Locate the meal in your meal list
+2. Click the **Move** icon (arrows)
+3. Select new date and/or slot
+4. Click **Move Meal**
+
+<Warning>
+If a meal already exists in the target date/slot, you'll receive a conflict error. Delete or move the existing meal first.
+</Warning>
+
+**API Endpoint:**
+
+```
+PATCH /api/meals/:id/move
+```
+
+You can move:
+- Only the date (keep same slot)
+- Only the slot (keep same date)
+- Both date and slot
+
+## Editing Meals
+
+### Update Meal Details
+
+Modify any aspect of a logged meal:
+
+```typescript
+PATCH /api/meals/:id
+
+{
+  "servings": 2,  // Update servings for recipe-based meal
+  "customItem": {  // Or update custom item details
+    "amount": 250
+  }
+}
+```
+
+<Tip>
+Partial updates are supported. Only include fields you want to change.
+</Tip>
+
+### Converting Between Types
+
+You can convert a recipe-based meal to a custom item or vice versa:
+
+- To switch to custom item: Include `customItem` in update (removes `recipeId` and `servings`)
+- To switch to recipe: Include `recipeId` and `servings` (removes `customItem`)
+
+## Deleting Meals
+
+Remove meals from your log:
+
+```
+DELETE /api/meals/:id
+```
+
+**In the UI:**
+
+1. Find the meal in your list
+2. Click the delete icon (trash)
+3. Confirm deletion
+
+<Warning>
+Deletion is permanent and cannot be undone. Your daily macro totals will update immediately.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Log meals immediately after eating">
+    Track meals right away while portions and details are fresh in your mind. This improves accuracy and reduces end-of-day catch-up work.
+  </Accordion>
+  
+  <Accordion title="Create recipes for frequent meals">
+    Instead of logging custom items repeatedly, save common meals as recipes. This saves time and ensures consistency.
+  </Accordion>
+  
+  <Accordion title="Use decimals for partial servings">
+    Don't round servings to whole numbers. Log 0.5 or 1.5 servings for more accurate tracking.
+  </Accordion>
+  
+  <Accordion title="Verify nutrition data from reliable sources">
+    Use USDA FoodData Central or verified nutrition labels for accurate macro information.
+  </Accordion>
+  
+  <Accordion title="Track everything, even small snacks">
+    Small items add up throughout the day. Log all food and drinks for complete nutritional awareness.
+  </Accordion>
+</AccordionGroup>
+
+## Data Structure Reference
+
+Complete meal model from `backend/src/models/Meal.ts:5`:
+
+```typescript
+interface IMeal {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  date: string;  // Format: YYYY-MM-DD
+  slot: "breakfast" | "lunch" | "dinner" | "snack";
+  
+  // Recipe-based meal (mutually exclusive with customItem)
+  recipeId?: Types.ObjectId;
+  servings?: number;
+  
+  // Custom food item (mutually exclusive with recipe)
+  customItem?: {
+    name: string;
+    amount: number;
+    unit: "g" | "ml" | "unit";
+    nutritionBasis: {
+      amount: number;
+      unit: "g" | "ml" | "unit";
+    };
+    macrosPerBasis: {
+      kcal: number;
+      protein: number;
+      carbohydrate: number;
+      fat: number;
+    };
+    gramsPerUnit?: number;
+    densityGPerMl?: number;
+  };
+  
+  createdAt: Date;
+  updatedAt: Date;
+}
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Error: 'A meal for this date and slot already exists'">
+    Each date/slot combination can only have one meal. Either:
+    - Choose a different slot
+    - Delete the existing meal first
+    - Use the move feature to relocate the existing meal
+  </Accordion>
+  
+  <Accordion title="Macros don't match expectations">
+    Verify:
+    - Nutrition basis is correct (usually 100g or 100ml)
+    - Amount consumed is accurately measured
+    - For recipes, check that servings are correct
+    - Macros per basis match your nutrition source
+  </Accordion>
+  
+  <Accordion title="Can't update recipe-based meal to custom item">
+    When converting types, use the full update (PUT) endpoint or ensure you're removing the conflicting fields (`recipeId`/`servings` when adding `customItem`).
+  </Accordion>
+</AccordionGroup>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Recipes" icon="book-open" href="/features/recipes">
+    Create and manage recipes for quick meal logging
+  </Card>
+  <Card title="User Profile" icon="user" href="/api/users/update-profile">
+    Configure your macro goals and preferences
+  </Card>
+  <Card title="Progress Tracking" icon="chart-line" href="/features/progress">
+    Monitor how nutrition impacts your fitness progress
+  </Card>
+</CardGroup>

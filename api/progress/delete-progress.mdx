@@ -1,0 +1,85 @@
+---
+title: "Delete Progress Entry"
+api: "DELETE /api/v1/progress/:id"
+description: "Permanently delete a progress entry and its associated data"
+---
+
+Permanently delete a progress entry for the authenticated user. This action cannot be undone. Note that associated photos stored in Cloudinary may need to be cleaned up separately.
+
+## Path Parameters
+
+<ParamField path="id" type="string" required>
+  Unique identifier of the progress entry to delete
+  
+  Example: `prg_123` or MongoDB ObjectId
+</ParamField>
+
+## Response
+
+<ResponseField name="ok" type="boolean">
+  Indicates whether the deletion was successful
+  
+  Example: `true`
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X DELETE "https://api.fitboard.app/api/v1/progress/prg_123" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.fitboard.app/api/v1/progress/prg_123', {
+  method: 'DELETE',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN'
+  }
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.delete(
+    'https://api.fitboard.app/api/v1/progress/prg_123',
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+data = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 Success
+{
+  "ok": true
+}
+```
+
+```json 401 Unauthorized
+{
+  "error": "Unauthorized"
+}
+```
+
+```json 404 Not Found
+{
+  "error": "Not found"
+}
+```
+
+```json 500 Server Error
+{
+  "error": "Failed to delete progress"
+}
+```
+</ResponseExample>
+
+## Notes
+
+- This is a permanent deletion and cannot be undone
+- The authenticated user must own the progress entry to delete it
+- Photos stored in Cloudinary associated with this entry are not automatically deleted
+- Consider implementing a soft delete pattern for your application if you need to recover deleted entries

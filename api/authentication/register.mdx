@@ -1,0 +1,129 @@
+---
+title: Register
+api: POST /api/v1/register
+---
+
+Register a new user account with email, username, and password. Optionally upload an avatar image.
+
+## Request
+
+<ParamField body="email" type="string" required>
+  User's email address. Must be a valid email format.
+</ParamField>
+
+<ParamField body="username" type="string" required>
+  Username for the account. Must be between 3 and 32 characters.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password. Must be at least 8 characters long.
+</ParamField>
+
+<ParamField body="avatar" type="file">
+  Optional profile picture. Must be an image file (JPEG, PNG, etc.). Uploaded as multipart/form-data. If not provided, a default avatar will be assigned.
+</ParamField>
+
+## Response
+
+<ResponseField name="_id" type="string">
+  Unique user identifier
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  User's email address
+</ResponseField>
+
+<ResponseField name="username" type="string">
+  User's username
+</ResponseField>
+
+<ResponseField name="avatarUrl" type="string">
+  URL to the user's avatar image
+</ResponseField>
+
+<ResponseField name="isAdmin" type="boolean">
+  Whether the user has admin privileges (defaults to false)
+</ResponseField>
+
+<ResponseField name="active" type="boolean">
+  Whether the user account is active
+</ResponseField>
+
+<ResponseField name="createdAt" type="string">
+  ISO 8601 timestamp of account creation
+</ResponseField>
+
+<ResponseField name="updatedAt" type="string">
+  ISO 8601 timestamp of last update
+</ResponseField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://api.fitboard.com/api/v1/register \
+  -F "email=jane@mail.com" \
+  -F "username=janedoe" \
+  -F "password=SecurePass123" \
+  -F "avatar=@/path/to/profile.jpg"
+```
+
+```bash cURL (without avatar)
+curl -X POST https://api.fitboard.com/api/v1/register \
+  -F "email=jane@mail.com" \
+  -F "username=janedoe" \
+  -F "password=SecurePass123"
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 201 Created
+{
+  "_id": "64f8a9b2c3d4e5f6a7b8c9d0",
+  "email": "jane@mail.com",
+  "username": "janedoe",
+  "avatarUrl": "https://res.cloudinary.com/ddgf7ijdc/image/upload/v1733781971/userAvatars/Avatars/abc123.jpg",
+  "isAdmin": false,
+  "active": true,
+  "createdAt": "2024-03-04T10:30:00.000Z",
+  "updatedAt": "2024-03-04T10:30:00.000Z"
+}
+```
+
+```json 400 Validation Error
+{
+  "error": "Validation failed",
+  "issues": [
+    {
+      "code": "too_small",
+      "minimum": 3,
+      "path": ["username"],
+      "message": "String must contain at least 3 character(s)"
+    }
+  ]
+}
+```
+
+```json 400 Invalid File Type
+{
+  "error": "Only image files are allowed!"
+}
+```
+
+</ResponseExample>
+
+## Validation Rules
+
+- **email**: Must be a valid email format
+- **username**: 3-32 characters
+- **password**: Minimum 8 characters
+- **avatar**: Image files only (checked by MIME type starting with "image/")
+
+## Notes
+
+- The avatar is uploaded as `multipart/form-data` with the field name "avatar"
+- If no avatar is provided, a default avatar URL is assigned
+- Uploaded avatars are stored in Cloudinary under the "userAvatars/Avatars" folder
+- The password is hashed before storage and never returned in responses
+- Email addresses are stored in lowercase for case-insensitive lookups

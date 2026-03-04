@@ -1,0 +1,150 @@
+---
+title: Login
+api: POST /api/v1/login
+---
+
+Authenticate a user with email and password credentials. Returns a JWT token for subsequent authenticated requests.
+
+## Request
+
+<ParamField body="email" type="string" required>
+  User's email address. Case-insensitive.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  User's password. Must be at least 1 character.
+</ParamField>
+
+## Response
+
+<ResponseField name="token" type="string">
+  JWT token to use for authenticated requests. Include this in the `Authorization` header as `Bearer {token}`.
+</ResponseField>
+
+<ResponseField name="user" type="object">
+  The authenticated user object
+  
+  <ResponseField name="_id" type="string">
+    Unique user identifier
+  </ResponseField>
+  
+  <ResponseField name="email" type="string">
+    User's email address
+  </ResponseField>
+  
+  <ResponseField name="username" type="string">
+    User's username
+  </ResponseField>
+  
+  <ResponseField name="avatarUrl" type="string">
+    URL to the user's avatar image
+  </ResponseField>
+  
+  <ResponseField name="isAdmin" type="boolean">
+    Whether the user has admin privileges
+  </ResponseField>
+  
+  <ResponseField name="active" type="boolean">
+    Whether the user account is active
+  </ResponseField>
+  
+  <ResponseField name="createdAt" type="string">
+    ISO 8601 timestamp of account creation
+  </ResponseField>
+  
+  <ResponseField name="updatedAt" type="string">
+    ISO 8601 timestamp of last update
+  </ResponseField>
+</ResponseField>
+
+<RequestExample>
+
+```bash cURL
+curl -X POST https://api.fitboard.com/api/v1/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "jane@mail.com",
+    "password": "SecurePass123"
+  }'
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.fitboard.com/api/v1/login', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: 'jane@mail.com',
+    password: 'SecurePass123'
+  })
+});
+
+const { token, user } = await response.json();
+```
+
+</RequestExample>
+
+<ResponseExample>
+
+```json 200 Success
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NGY4YTliMmMzZDRlNWY2YTdiOGM5ZDAiLCJpYXQiOjE2OTQwNzI0MDAsImV4cCI6MTY5NjY2NDQwMH0.example_signature",
+  "user": {
+    "_id": "64f8a9b2c3d4e5f6a7b8c9d0",
+    "email": "jane@mail.com",
+    "username": "janedoe",
+    "avatarUrl": "https://res.cloudinary.com/ddgf7ijdc/image/upload/v1733781971/userAvatars/Avatars/abc123.jpg",
+    "isAdmin": false,
+    "active": true,
+    "createdAt": "2024-03-04T10:30:00.000Z",
+    "updatedAt": "2024-03-04T10:30:00.000Z"
+  }
+}
+```
+
+```json 401 Invalid Credentials
+{
+  "error": "Invalid credentials"
+}
+```
+
+```json 400 Validation Error
+{
+  "error": "Validation failed",
+  "issues": [
+    {
+      "code": "invalid_string",
+      "validation": "email",
+      "path": ["email"],
+      "message": "Invalid email"
+    }
+  ]
+}
+```
+
+</ResponseExample>
+
+## Authentication Flow
+
+1. User submits email and password via POST request
+2. Email is converted to lowercase for case-insensitive lookup
+3. User is retrieved from database with password hash
+4. Password is verified against stored hash
+5. If valid, a JWT token is generated and returned along with user data
+6. Client stores the token and includes it in subsequent requests
+
+## Using the Token
+
+Include the returned token in the `Authorization` header for authenticated requests:
+
+```
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+## Security Notes
+
+- Passwords are never returned in API responses
+- Email lookup is case-insensitive
+- Generic error message is returned for both invalid email and invalid password to prevent user enumeration
+- The same error ("Invalid credentials") is returned whether the user doesn't exist or the password is wrong

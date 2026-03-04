@@ -1,0 +1,162 @@
+---
+title: Admin Dashboard Overview
+description: Comprehensive admin capabilities and access control in Fitboard
+---
+
+## Introduction
+
+The Fitboard admin dashboard provides privileged users with powerful tools to manage the platform, oversee user accounts, and maintain system integrity. Admin features are protected by multi-layered authentication and authorization middleware.
+
+## Admin Access Control
+
+### Authentication Requirements
+
+All admin routes require two levels of authentication:
+
+1. **JWT Bearer Token Authentication** (`requireAuth` middleware)
+2. **Admin Role Verification** (`requireAdmin` middleware)
+
+```typescript
+// From admin.ts:7
+router.use(requireAuth, requireAdmin);
+```
+
+### How Authentication Works
+
+The authentication flow involves two middleware functions:
+
+#### 1. Bearer Token Validation
+
+```typescript
+// From auth.ts:4-25
+export function requireAuth(req, res, next) {
+  const hdr = req.headers.authorization;
+  if (!hdr?.startsWith("Bearer "))
+    return res.status(401).json({ error: "Unauthorized" });
+
+  const token = hdr.slice("Bearer ".length);
+  try {
+    const secret = process.env.JWT_SECRET || "dev_secret_change_me";
+    const payload = jwt.verify(token, secret);
+    req.auth = { userId: payload.sub, isAdmin: payload.isAdmin === true };
+    next();
+  } catch {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}
+```
+
+#### 2. Admin Role Verification
+
+```typescript
+// From requireAdmin.ts:8-18
+export async function requireAdmin(req, res, next) {
+  if (!req.auth?.userId) 
+    return res.status(401).json({ error: "Unauthorized" });
+
+  const me = await User.findById(req.auth.userId).lean();
+  if (!me?.isAdmin) 
+    return res.status(403).json({ error: "Forbidden" });
+  next();
+}
+```
+
+<Warning>
+  Admin privileges grant access to destructive operations including user account deletion and privilege escalation. Always verify the admin status is stored securely in the database before granting access.
+</Warning>
+
+## Key Admin Features
+
+The admin dashboard provides the following core capabilities:
+
+### User Management
+
+Administrators can perform comprehensive user account operations:
+
+- **View User Details** - Access complete user profiles and account information
+- **Grant/Revoke Admin Privileges** - Elevate or demote user roles
+- **Deactivate User Accounts** - Temporarily disable user access
+- **Permanently Delete Users** - Remove users and all associated data
+
+<Info>
+  All user management operations are documented in detail in the [User Management](/admin/user-management) section.
+</Info>
+
+### Security Considerations
+
+#### Self-Protection Mechanisms
+
+Fitboard implements safeguards to prevent administrators from accidentally harming their own accounts:
+
+```typescript
+// From adminController.ts:27-31
+if (req.params.id === req.auth!.userId) {
+  return res
+    .status(400)
+    .json({ error: "Admins cannot deactivate themselves" });
+}
+```
+
+Admins are prevented from:
+- Deactivating their own accounts
+- Deleting their own accounts
+
+#### Data Integrity
+
+User deletion operations use MongoDB transactions to ensure atomicity:
+
+```typescript
+// From adminController.ts:50-66
+const session = await mongoose.startSession();
+try {
+  await session.withTransaction(async () => {
+    await Meal.deleteMany({ userId: req.params.id }).session(session);
+    await Recipe.deleteMany({ userId: req.params.id }).session(session);
+    await Routine.deleteMany({ userId: req.params.id }).session(session);
+    await Progress.deleteMany({ userId: req.params.id }).session(session);
+    await User.deleteOne({ _id: req.params.id }).session(session);
+  });
+} finally {
+  session.endSession();
+}
+```
+
+## API Base Path
+
+All admin endpoints are prefixed with:
+
+```
+/api/v1/admin
+```
+
+## Response Formats
+
+### Success Response
+
+```json
+{
+  "ok": true,
+  "userId": "usr_123",
+  "message": "User updated successfully"
+}
+```
+
+### Error Responses
+
+| Status Code | Description |
+|-------------|-------------|
+| `401` | Unauthorized - Missing or invalid JWT token |
+| `403` | Forbidden - User is not an admin |
+| `404` | User not found |
+| `400` | Bad request - Invalid operation (e.g., self-deletion) |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="User Management" icon="users" href="/admin/user-management">
+    Learn how to manage user accounts, roles, and permissions
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/admin">
+    Explore detailed API endpoint specifications
+  </Card>
+</CardGroup>

@@ -1,0 +1,425 @@
+---
+title: "List Progress Entries"
+api: "GET /api/v1/progress"
+description: "Retrieve a paginated list of progress entries with optional date range filtering and sorting"
+---
+
+Retrieve all progress entries for the authenticated user with pagination support, date range filtering, and flexible sorting options.
+
+## Query Parameters
+
+<ParamField query="page" type="integer" default={1}>
+  Page number for pagination (minimum: 1)
+</ParamField>
+
+<ParamField query="limit" type="integer" default={20}>
+  Number of items per page (minimum: 1, maximum: 100)
+</ParamField>
+
+<ParamField query="from" type="string">
+  Start date for filtering entries (format: YYYY-MM-DD)
+  
+  Example: `2025-01-01`
+</ParamField>
+
+<ParamField query="to" type="string">
+  End date for filtering entries (format: YYYY-MM-DD)
+  
+  Example: `2025-12-31`
+</ParamField>
+
+<ParamField query="sort" type="string" default="-date">
+  Sort order for results
+  
+  Options:
+  - `date` - Oldest first
+  - `-date` - Newest first (default)
+  - `createdAt` - Oldest created first
+  - `-createdAt` - Newest created first
+</ParamField>
+
+## Response
+
+<ResponseField name="page" type="integer">
+  Current page number
+</ResponseField>
+
+<ResponseField name="limit" type="integer">
+  Number of items per page
+</ResponseField>
+
+<ResponseField name="total" type="integer">
+  Total number of progress entries matching the filter
+</ResponseField>
+
+<ResponseField name="hasMore" type="boolean">
+  Indicates if there are more pages available
+</ResponseField>
+
+<ResponseField name="items" type="array">
+  Array of progress entry objects
+  
+  <Expandable title="ProgressEntry properties">
+    <ResponseField name="id" type="string">
+      Unique identifier for the progress entry
+      
+      Example: `prg_123`
+    </ResponseField>
+    
+    <ResponseField name="userId" type="string">
+      ID of the user who owns this entry
+    </ResponseField>
+    
+    <ResponseField name="date" type="string">
+      Date of the progress entry (YYYY-MM-DD format)
+      
+      Example: `2025-11-05`
+    </ResponseField>
+    
+    <ResponseField name="timeOfDay" type="string">
+      Time of day when measurements were taken
+      
+      Options: `morning`, `evening`, `other`
+    </ResponseField>
+    
+    <ResponseField name="timezone" type="string">
+      Timezone of the entry
+    </ResponseField>
+    
+    <ResponseField name="unitSystem" type="string">
+      Unit system used for measurements
+      
+      Options: `metric`, `imperial`
+    </ResponseField>
+    
+    <ResponseField name="source" type="string">
+      Source of the progress data
+      
+      Options: `manual`, `device`, `import`
+    </ResponseField>
+    
+    <ResponseField name="weight_kg" type="number">
+      Body weight in kilograms
+      
+      Example: `72.4`
+    </ResponseField>
+    
+    <ResponseField name="waist_cm" type="number">
+      Waist circumference in centimeters
+      
+      Example: `81`
+    </ResponseField>
+    
+    <ResponseField name="body" type="object">
+      Body composition measurements
+      
+      <Expandable title="body properties">
+        <ResponseField name="bodyFatPct" type="number">
+          Body fat percentage (1-75)
+          
+          Example: `18.6`
+        </ResponseField>
+        
+        <ResponseField name="bodyFatMethod" type="string">
+          Method used to measure body fat
+          
+          Options: `bmi`, `impedance`, `caliper`, `scan`
+        </ResponseField>
+        
+        <ResponseField name="chest_cm" type="number">
+          Chest circumference in centimeters
+        </ResponseField>
+        
+        <ResponseField name="hip_cm" type="number">
+          Hip circumference in centimeters
+        </ResponseField>
+        
+        <ResponseField name="thigh_cm" type="number">
+          Thigh circumference in centimeters
+        </ResponseField>
+        
+        <ResponseField name="arm_cm" type="number">
+          Arm circumference in centimeters
+        </ResponseField>
+        
+        <ResponseField name="neck_cm" type="number">
+          Neck circumference in centimeters
+        </ResponseField>
+        
+        <ResponseField name="estimatedLeanMass_kg" type="number">
+          Estimated lean body mass in kilograms
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="vitals" type="object">
+      Vital signs measurements
+      
+      <Expandable title="vitals properties">
+        <ResponseField name="rhr_bpm" type="number">
+          Resting heart rate in beats per minute
+        </ResponseField>
+        
+        <ResponseField name="bp_systolic" type="number">
+          Systolic blood pressure
+        </ResponseField>
+        
+        <ResponseField name="bp_diastolic" type="number">
+          Diastolic blood pressure
+        </ResponseField>
+        
+        <ResponseField name="spo2_pct" type="number">
+          Blood oxygen saturation percentage (50-100)
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="wellness" type="object">
+      Wellness metrics
+      
+      <Expandable title="wellness properties">
+        <ResponseField name="sleep_hours" type="number">
+          Hours of sleep (0-24)
+        </ResponseField>
+        
+        <ResponseField name="energy_1to5" type="integer">
+          Energy level rating (1-5)
+        </ResponseField>
+        
+        <ResponseField name="stress_1to5" type="integer">
+          Stress level rating (1-5)
+        </ResponseField>
+        
+        <ResponseField name="soreness_1to5" type="integer">
+          Muscle soreness rating (1-5)
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="activity" type="object">
+      Activity and exercise data
+      
+      <Expandable title="activity properties">
+        <ResponseField name="steps" type="integer">
+          Number of steps taken
+          
+          Example: `8500`
+        </ResponseField>
+        
+        <ResponseField name="timeTrainedMin" type="integer">
+          Time spent training in minutes
+        </ResponseField>
+        
+        <ResponseField name="vo2max" type="number">
+          VO2 max measurement
+        </ResponseField>
+        
+        <ResponseField name="workoutId" type="string">
+          Reference to associated workout
+        </ResponseField>
+        
+        <ResponseField name="caloriesBurned_est" type="integer">
+          Estimated calories burned
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="notes" type="string">
+      User notes for this progress entry
+      
+      Example: `Felt great this week.`
+    </ResponseField>
+    
+    <ResponseField name="photos" type="array">
+      Array of progress photos
+      
+      <Expandable title="photo properties">
+        <ResponseField name="url" type="string">
+          URL of the photo
+        </ResponseField>
+        
+        <ResponseField name="publicId" type="string">
+          Cloudinary public ID
+        </ResponseField>
+        
+        <ResponseField name="pose" type="string">
+          Photo pose type
+          
+          Options: `front`, `side`, `back`
+        </ResponseField>
+        
+        <ResponseField name="lighting" type="string">
+          Lighting conditions
+          
+          Options: `natural`, `artificial`, `unknown`
+        </ResponseField>
+        
+        <ResponseField name="notes" type="string">
+          Notes about the photo
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="startPhoto" type="object">
+      Reference photo marking the start of progress tracking
+      
+      <Expandable title="photo properties">
+        <ResponseField name="url" type="string">
+          URL of the photo
+        </ResponseField>
+        
+        <ResponseField name="publicId" type="string">
+          Cloudinary public ID
+        </ResponseField>
+        
+        <ResponseField name="notes" type="string">
+          Notes about the photo
+        </ResponseField>
+        
+        <ResponseField name="capturedAt" type="string">
+          Timestamp when photo was captured
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="comparePhoto" type="object">
+      Reference photo for comparison
+      
+      <Expandable title="photo properties">
+        <ResponseField name="url" type="string">
+          URL of the photo
+        </ResponseField>
+        
+        <ResponseField name="publicId" type="string">
+          Cloudinary public ID
+        </ResponseField>
+        
+        <ResponseField name="notes" type="string">
+          Notes about the photo
+        </ResponseField>
+        
+        <ResponseField name="capturedAt" type="string">
+          Timestamp when photo was captured
+        </ResponseField>
+      </Expandable>
+    </ResponseField>
+    
+    <ResponseField name="tags" type="array">
+      Array of tag strings for categorization
+    </ResponseField>
+    
+    <ResponseField name="createdAt" type="string">
+      Timestamp when entry was created
+    </ResponseField>
+    
+    <ResponseField name="updatedAt" type="string">
+      Timestamp when entry was last updated
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<RequestExample>
+```bash cURL
+curl -X GET "https://api.fitboard.app/api/v1/progress?page=1&limit=20&from=2025-01-01&to=2025-12-31&sort=-date" \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+```javascript JavaScript
+const response = await fetch('https://api.fitboard.app/api/v1/progress?page=1&limit=20&sort=-date', {
+  method: 'GET',
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN'
+  }
+});
+
+const data = await response.json();
+```
+
+```python Python
+import requests
+
+response = requests.get(
+    'https://api.fitboard.app/api/v1/progress',
+    params={
+        'page': 1,
+        'limit': 20,
+        'from': '2025-01-01',
+        'to': '2025-12-31',
+        'sort': '-date'
+    },
+    headers={'Authorization': 'Bearer YOUR_TOKEN'}
+)
+
+data = response.json()
+```
+</RequestExample>
+
+<ResponseExample>
+```json 200 Success
+{
+  "page": 1,
+  "limit": 20,
+  "total": 57,
+  "hasMore": true,
+  "items": [
+    {
+      "id": "prg_123",
+      "userId": "usr_456",
+      "date": "2025-11-05",
+      "timeOfDay": "morning",
+      "unitSystem": "metric",
+      "source": "manual",
+      "weight_kg": 72.4,
+      "waist_cm": 81,
+      "body": {
+        "bodyFatPct": 18.6,
+        "bodyFatMethod": "impedance",
+        "chest_cm": 98,
+        "hip_cm": 95,
+        "arm_cm": 32
+      },
+      "vitals": {
+        "rhr_bpm": 62,
+        "bp_systolic": 120,
+        "bp_diastolic": 80
+      },
+      "wellness": {
+        "sleep_hours": 7.5,
+        "energy_1to5": 4,
+        "stress_1to5": 2,
+        "soreness_1to5": 1
+      },
+      "activity": {
+        "steps": 8500,
+        "timeTrainedMin": 60,
+        "caloriesBurned_est": 450
+      },
+      "notes": "Felt great this week.",
+      "photos": [
+        {
+          "url": "https://res.cloudinary.com/...",
+          "publicId": "progress/user/2025-11-05/front",
+          "pose": "front",
+          "lighting": "natural"
+        }
+      ],
+      "tags": ["bulking", "strength"],
+      "createdAt": "2025-11-05T08:30:00Z",
+      "updatedAt": "2025-11-05T08:30:00Z"
+    }
+  ]
+}
+```
+
+```json 401 Unauthorized
+{
+  "error": "Unauthorized"
+}
+```
+
+```json 500 Server Error
+{
+  "error": "Failed to list progress"
+}
+```
+</ResponseExample>

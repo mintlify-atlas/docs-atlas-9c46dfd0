@@ -1,0 +1,605 @@
+---
+title: Workout Routines
+description: Build, organize, and track workout routines with detailed exercise programming and performance logging
+---
+
+## Overview
+
+Fitboard's routine system helps you plan and execute structured workout programs. Create detailed routines with exercise blocks, track performance over time, and maintain consistency with your training plan.
+
+<CardGroup cols={2}>
+  <Card title="Block-Based Structure" icon="cubes">
+    Organize workouts into logical blocks (warmup, main, accessory)
+  </Card>
+  <Card title="Exercise Programming" icon="dumbbell">
+    Define sets, reps, load, RIR, tempo, and rest periods
+  </Card>
+  <Card title="Templates & Archives" icon="bookmark">
+    Save templates for reuse and archive completed programs
+  </Card>
+  <Card title="Performance Tracking" icon="chart-line">
+    Log when routines are performed to monitor frequency
+  </Card>
+</CardGroup>
+
+## Creating Routines
+
+### Basic Routine Structure
+
+Routines are composed of blocks, and each block contains exercises:
+
+```typescript
+{
+  "name": "Upper Body Push A",
+  "blocks": [
+    {
+      "title": "Main Lifts",
+      "position": 1,
+      "exerciseType": "strength",
+      "exercises": [
+        {
+          "name": "Barbell Bench Press",
+          "sets": 4,
+          "reps": "5",
+          "restSec": 180,
+          "position": 1,
+          "loadKg": 100,
+          "rir": 2,
+          "tempo": "3010",
+          "notes": "Focus on leg drive",
+          "cues": ["Retract scapula", "Drive feet into floor"]
+        }
+      ]
+    },
+    {
+      "title": "Accessories",
+      "position": 2,
+      "exerciseType": "hypertrophy",
+      "exercises": [ /* ... */ ]
+    }
+  ],
+  "tags": ["push", "upper", "strength"],
+  "isTemplate": false,
+  "isArchived": false,
+  "estimatedDurationMin": 75
+}
+```
+
+**Workflow:**
+
+1. Navigate to **Routines** → **Create Routine**
+2. Enter routine name (e.g., "Push Day A")
+3. Add blocks to organize exercises
+4. Add exercises to each block
+5. Configure exercise details
+6. Set tags for filtering
+7. Optionally mark as template for reuse
+8. Click **Save Routine**
+
+<Info>
+Routine names must be unique per user. Choose descriptive names like "Upper Push A" rather than just "Workout".
+</Info>
+
+## Routine Blocks
+
+Blocks organize exercises into logical groups:
+
+### Block Properties
+
+- **title**: Block name (e.g., "Warmup", "Main Lifts", "Core")
+- **position**: Order in the routine (1, 2, 3...)
+- **exerciseType**: Training focus
+  - `strength`: Heavy compound movements (3-6 reps)
+  - `hypertrophy`: Muscle building (6-12 reps)
+  - `conditioning`: Cardio/endurance work
+  - `mobility`: Flexibility and movement prep
+- **rounds**: Number of times to repeat the block (for circuits)
+- **restBetweenExercisesSec**: Rest between exercises in circuit format
+- **timer**: Special timing modes
+
+### Block Types Examples
+
+<Accordion title="Strength Block">
+```json
+{
+  "title": "Main Lifts",
+  "position": 1,
+  "exerciseType": "strength",
+  "exercises": [
+    {
+      "name": "Back Squat",
+      "sets": 5,
+      "reps": "3",
+      "restSec": 240,
+      "loadKg": 140,
+      "rir": 1
+    }
+  ]
+}
+```
+Use for heavy, low-rep compound movements with long rest periods.
+</Accordion>
+
+<Accordion title="Hypertrophy Block">
+```json
+{
+  "title": "Accessories",
+  "position": 2,
+  "exerciseType": "hypertrophy",
+  "exercises": [
+    {
+      "name": "Dumbbell Flyes",
+      "sets": 3,
+      "reps": "10-12",
+      "restSec": 90,
+      "loadKg": 20,
+      "rir": 1,
+      "tempo": "3010"
+    }
+  ]
+}
+```
+Use for muscle-building work with moderate weight and volume.
+</Accordion>
+
+<Accordion title="Conditioning Circuit">
+```json
+{
+  "title": "Finisher Circuit",
+  "position": 3,
+  "exerciseType": "conditioning",
+  "rounds": 3,
+  "restBetweenExercisesSec": 30,
+  "timer": {
+    "mode": "amrap",
+    "seconds": 600
+  },
+  "exercises": [
+    { "name": "Burpees", "sets": 1, "reps": "10", "position": 1 },
+    { "name": "Kettlebell Swings", "sets": 1, "reps": "20", "position": 2 },
+    { "name": "Box Jumps", "sets": 1, "reps": "10", "position": 3 }
+  ]
+}
+```
+Use for high-intensity circuits with minimal rest.
+</Accordion>
+
+### Timer Modes
+
+Special timing for conditioning blocks:
+
+- **countdown**: Count down from specified seconds
+- **emom**: Every Minute On the Minute
+- **amrap**: As Many Rounds/Reps As Possible
+- **tabata**: 20s work / 10s rest intervals
+
+Example:
+```json
+{
+  "timer": {
+    "mode": "emom",
+    "seconds": 600  // 10 minutes
+  }
+}
+```
+
+## Exercise Programming
+
+### Exercise Properties
+
+Each exercise includes:
+
+- **name**: Exercise name
+- **sets**: Number of sets to perform
+- **reps**: Rep scheme (e.g., "5", "8-12", "AMRAP")
+- **restSec**: Rest between sets in seconds
+- **position**: Order within the block
+- **loadKg**: Weight/load in kilograms (optional)
+- **rir**: Reps In Reserve - proximity to failure (optional, 0-10)
+- **tempo**: Tempo prescription (e.g., "3010") (optional)
+- **notes**: Exercise-specific notes (optional)
+- **videoUrl**: Link to demonstration video (optional)
+- **cues**: Array of coaching cues (optional)
+
+### Rep Scheme Formats
+
+<CardGroup cols={2}>
+  <Card title="Fixed Reps">
+    `"5"` - Perform exactly 5 reps
+  </Card>
+  <Card title="Rep Range">
+    `"8-12"` - Aim for 8-12 reps
+  </Card>
+  <Card title="Max Effort">
+    `"AMRAP"` - As many reps as possible
+  </Card>
+  <Card title="Timed">
+    `"60s"` - Time-based work
+  </Card>
+</CardGroup>
+
+### Tempo Notation
+
+Tempo uses 4-digit format: `"ECCI"`
+
+- **E**ccentric (lowering): 3 = 3 seconds down
+- **C**atch (bottom): 0 = no pause
+- **C**oncentric (lifting): 1 = 1 second up
+- **I**sometric (top): 0 = no pause
+
+Example: `"3010"` for bench press:
+- 3s lowering bar to chest
+- 0s pause at bottom
+- 1s pressing up
+- 0s pause at top
+
+<Tip>
+Use tempo to control time under tension for hypertrophy or teach proper movement patterns.
+</Tip>
+
+### RIR (Reps In Reserve)
+
+Rate proximity to failure:
+
+- **0 RIR**: Absolute failure
+- **1 RIR**: 1 rep left in the tank
+- **2 RIR**: 2 reps left (common for hypertrophy)
+- **3+ RIR**: Submaximal work
+
+RIR helps manage fatigue and progressive overload.
+
+### Coaching Cues
+
+Add form reminders directly to exercises:
+
+```typescript
+{
+  "name": "Deadlift",
+  "cues": [
+    "Brace core before lift",
+    "Push floor away with legs",
+    "Keep bar close to shins",
+    "Lock out with glutes, not lower back"
+  ]
+}
+```
+
+**In the UI:**
+
+Cues display during workout execution as reminders for proper form.
+
+## Templates & Archives
+
+### Creating Templates
+
+Save routines as templates for reuse:
+
+```json
+{
+  "name": "Full Body Template",
+  "isTemplate": true,
+  "blocks": [ /* ... */ ]
+}
+```
+
+**Workflow:**
+
+1. Create routine as normal
+2. Check **Save as Template**
+3. Save routine
+
+**Using Templates:**
+
+Templates appear in a separate section for quick duplication. Duplicate a template to start a new instance.
+
+### Archiving Routines
+
+Move completed programs out of active view:
+
+```http
+POST /api/routines/:id/archive
+```
+
+**Workflow:**
+
+1. Find routine in list
+2. Click **Archive**
+3. Routine moves to archived section
+
+**Unarchive:**
+```http
+POST /api/routines/:id/unarchive
+```
+
+<Info>
+Archived routines remain accessible but don't clutter your active routine list. Filter by "Include Archived" to view them.
+</Info>
+
+## Tracking Performance
+
+### Marking Routines as Performed
+
+Log when you complete a routine:
+
+```http
+POST /api/routines/:id/performed
+
+{
+  "date": "2026-03-04"  // Optional, defaults to today
+}
+```
+
+**Workflow:**
+
+1. Open routine details
+2. Click **Mark as Complete**
+3. Confirm completion date
+4. Routine's `lastPerformedAt` and `timesPerformed` update
+
+**What Gets Tracked:**
+
+- `lastPerformedAt`: Date of most recent completion
+- `timesPerformed`: Total times routine has been completed
+
+**Viewing Performance History:**
+
+Sort routines by:
+- `-lastPerformedAt`: Most recently performed first
+- `-timesPerformed`: Most frequently performed first
+
+<Tip>
+Use performance tracking to ensure balanced training. If one routine shows much lower `timesPerformed`, you may be neglecting that training stimulus.
+</Tip>
+
+### Linking to Progress Entries
+
+Connect workouts to progress tracking:
+
+```typescript
+// In Progress entry
+{
+  "activity": {
+    "workoutId": "65f8a2b3c4d5e6f7g8h9i0j1",  // Routine ID
+    "timeTrainedMin": 75,
+    "caloriesBurned_est": 450
+  }
+}
+```
+
+This creates a link between your routine and daily progress for comprehensive tracking.
+
+## Managing Routines
+
+### Searching & Filtering
+
+Find routines efficiently:
+
+```
+GET /api/routines?q=push&tag=strength&templatesOnly=true&sort=-createdAt
+```
+
+Query parameters:
+- `q`: Search routine name, block titles, or exercise names
+- `tag`: Filter by tag (comma-separated for multiple)
+- `templatesOnly`: Show only template routines
+- `includeArchived`: Include archived routines
+- `sort`: Order by name, creation date, last performed, or times performed
+
+**In the UI:**
+
+Use filters at the top of the routines page to narrow results.
+
+### Duplicating Routines
+
+Create copies for variations:
+
+```http
+POST /api/routines/:id/duplicate?name=Upper Push B
+```
+
+**Workflow:**
+
+1. Find routine to duplicate
+2. Click **Duplicate**
+3. Enter new name (or accept "Original Name (copy)")
+4. Click **Duplicate**
+
+The copy:
+- Includes all blocks and exercises
+- Resets `lastPerformedAt` and `timesPerformed` to 0
+- Is not archived (even if original was)
+- Can be edited independently
+
+<Info>
+Duplicate routines to create variations (e.g., "Push A" and "Push B") or to start a new training cycle with updated loads.
+</Info>
+
+### Editing Routines
+
+Update existing routines:
+
+```typescript
+PATCH /api/routines/:id
+
+{
+  "blocks": [  // Updated blocks array
+    // ...
+  ],
+  "estimatedDurationMin": 90
+}
+```
+
+**Common Edits:**
+
+- Adjust loads as you progress
+- Modify rep schemes
+- Add or remove exercises
+- Update RIR targets
+- Change rest periods
+
+<Warning>
+Editing a routine affects future workouts. Past performance logs are not modified.
+</Warning>
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Organize blocks logically">
+    Structure blocks by training goal: Warmup → Main Lifts → Accessories → Conditioning. This mirrors effective workout flow.
+  </Accordion>
+  
+  <Accordion title="Set realistic estimated durations">
+    Calculate total time including exercises, rest, warmup, and cooldown. This helps with scheduling.
+  </Accordion>
+  
+  <Accordion title="Use descriptive block and exercise names">
+    "Main: Horizontal Push" is clearer than "Block 1". "Barbell Bench Press (flat)" is clearer than "Bench".
+  </Accordion>
+  
+  <Accordion title="Leverage tags for programming phases">
+    Tag routines with training phase (e.g., "strength-phase", "deload", "peaking") to filter by mesocycle.
+  </Accordion>
+  
+  <Accordion title="Add video URLs for new exercises">
+    Link to form videos for exercises you're learning. Quick reference during workouts.
+  </Accordion>
+  
+  <Accordion title="Track performance weekly">
+    Mark routines as completed consistently to monitor training frequency and balance.
+  </Accordion>
+  
+  <Accordion title="Create templates for program phases">
+    Save base templates for strength, hypertrophy, and deload phases. Duplicate and adjust loads each cycle.
+  </Accordion>
+</AccordionGroup>
+
+## Data Structure Reference
+
+Complete routine model from `backend/src/models/Routine.ts:31`:
+
+```typescript
+interface IRoutine {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  name: string;
+  blocks: RoutineBlock[];
+  tags: string[];
+  isTemplate: boolean;
+  isArchived: boolean;
+  estimatedDurationMin?: number;
+  lastPerformedAt?: Date;
+  timesPerformed: number;  // Default: 0
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface RoutineBlock {
+  title?: string;
+  position: number;  // 1, 2, 3...
+  exercises: ExerciseItem[];
+  exerciseType?: "strength" | "hypertrophy" | "conditioning" | "mobility";
+  rounds?: number;
+  restBetweenExercisesSec?: number;
+  timer?: {
+    mode: "countdown" | "emom" | "amrap" | "tabata";
+    seconds: number;
+  };
+}
+
+interface ExerciseItem {
+  name: string;
+  sets: number;  // Minimum: 1
+  reps: string;  // "5" | "8-12" | "AMRAP" | etc.
+  restSec: number;  // Default: 90
+  position: number;
+  loadKg?: number;
+  rir?: number;  // 0-10
+  tempo?: string;  // "3010"
+  notes?: string;
+  videoUrl?: string;
+  cues: string[];  // Default: []
+}
+```
+
+## API Reference
+
+### List Routines
+```http
+GET /api/routines?page=1&limit=20&q=push&tag=strength&sort=-createdAt
+```
+
+### Get Routine
+```http
+GET /api/routines/:id
+```
+
+### Create Routine
+```http
+POST /api/routines
+Content-Type: application/json
+
+{ /* CreateRoutineDto */ }
+```
+
+### Update Routine
+```http
+PATCH /api/routines/:id
+Content-Type: application/json
+
+{ /* Partial update */ }
+```
+
+### Delete Routine
+```http
+DELETE /api/routines/:id
+```
+
+### Duplicate Routine
+```http
+POST /api/routines/:id/duplicate?name=New Name
+```
+
+### Archive/Unarchive
+```http
+POST /api/routines/:id/archive
+POST /api/routines/:id/unarchive
+```
+
+### Mark as Performed
+```http
+POST /api/routines/:id/performed
+Content-Type: application/json
+
+{ "date": "2026-03-04" }
+```
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Error: 'A routine with that name already exists'">
+    Routine names must be unique per user. Choose a different name or delete the existing routine.
+  </Accordion>
+  
+  <Accordion title="Can't reorder blocks or exercises">
+    Blocks and exercises are ordered by their `position` field. In the UI, drag-and-drop updates positions automatically.
+  </Accordion>
+  
+  <Accordion title="Performance tracking not updating">
+    Ensure you're clicking "Mark as Complete" after finishing the routine. The timestamp and counter update automatically.
+  </Accordion>
+  
+  <Accordion title="Template routines appear in active list">
+    Templates are included in the main list but can be filtered. Use the "Templates Only" filter to view just templates.
+  </Accordion>
+</AccordionGroup>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Progress Tracking" icon="chart-line" href="/features/progress">
+    Link routines to progress entries for comprehensive tracking
+  </Card>
+  <Card title="Categories & Tags" icon="tags" href="/features/tags">
+    Organize routines with custom tags
+  </Card>
+</CardGroup>

@@ -1,0 +1,507 @@
+---
+title: Recipe Management
+description: Create, organize, and share recipes with automatic nutritional calculations for streamlined meal planning
+---
+
+## Overview
+
+Fitboard's recipe system allows you to create reusable meal templates with automatic macro calculations. Build a library of your favorite meals, organize by categories, and log them quickly for consistent nutrition tracking.
+
+<CardGroup cols={2}>
+  <Card title="Ingredient Management" icon="list">
+    Add unlimited ingredients with precise measurements
+  </Card>
+  <Card title="Auto Macro Calculation" icon="calculator">
+    Nutritional values calculated automatically per serving
+  </Card>
+  <Card title="Category Organization" icon="folder">
+    Tag recipes for easy filtering and discovery
+  </Card>
+  <Card title="Serving Adjustments" icon="users">
+    Scale recipes for meal prep or individual portions
+  </Card>
+</CardGroup>
+
+## Creating Recipes
+
+### Basic Recipe Structure
+
+Every recipe requires:
+
+```typescript
+{
+  "name": "High Protein Breakfast Bowl",
+  "servings": 2,
+  "date": "2026-03-04",  // Creation date
+  "ingredients": [
+    {
+      "name": "Oats",
+      "amount": 80,
+      "unit": "g",
+      "nutritionBasis": { "amount": 100, "unit": "g" },
+      "macrosPerBasis": {
+        "kcal": 389,
+        "protein": 17,
+        "carbohydrate": 66,
+        "fat": 7
+      }
+    },
+    {
+      "name": "Banana",
+      "amount": 1,
+      "unit": "unit",
+      "nutritionBasis": { "amount": 1, "unit": "unit" },
+      "macrosPerBasis": {
+        "kcal": 105,
+        "protein": 1.3,
+        "carbohydrate": 27,
+        "fat": 0.4
+      },
+      "gramsPerUnit": 120
+    }
+  ],
+  "categoryIds": ["breakfast", "high-protein"]
+}
+```
+
+**Workflow:**
+
+1. Navigate to **Recipes** → **Create Recipe**
+2. Enter recipe name (must be unique)
+3. Set total servings the recipe makes
+4. Add ingredients one by one
+5. Assign categories for organization
+6. Click **Save Recipe**
+
+<Info>
+The creation date helps you track when you first saved a recipe. It's automatically set to today but can be customized.
+</Info>
+
+## Ingredient System
+
+### Adding Ingredients
+
+Each ingredient contains:
+
+- **name**: Ingredient name
+- **amount**: Quantity used in recipe
+- **unit**: Measurement unit (`g`, `ml`, or `unit`)
+- **nutritionBasis**: Reference amount for nutrition data
+- **macrosPerBasis**: Macros for the basis amount
+- **gramsPerUnit**: Optional weight conversion for unit-based items
+- **densityGPerMl**: Optional density for ml→g conversion
+
+**From the UI (`client/src/components/recipes/recipes-forms/CreateRecipe.tsx`):**
+
+1. Click **Add Ingredient**
+2. Enter ingredient name
+3. Input amount (supports decimals)
+4. Select unit type
+5. Define nutrition basis (e.g., "per 100g")
+6. Enter macros from nutrition label
+7. Click **Add** to include in recipe
+
+### Unit Types Explained
+
+<Accordion title="Grams (g) - Weight-Based Measurement">
+Use for solid foods measured by weight:
+- Meat, poultry, fish
+- Grains, pasta, rice
+- Powders (protein, flour)
+
+Example: 200g chicken breast
+</Accordion>
+
+<Accordion title="Milliliters (ml) - Volume-Based Measurement">
+Use for liquids measured by volume:
+- Milk, water, juice
+- Oils and sauces
+- Liquid sweeteners
+
+Example: 250ml almond milk
+
+Optionally set `densityGPerMl` for weight conversion (most liquids ≈ 1.0).
+</Accordion>
+
+<Accordion title="Units (unit) - Piece-Based Measurement">
+Use for discrete items counted by pieces:
+- Eggs
+- Fruits (apples, bananas)
+- Packaged items (protein bars)
+
+Example: 2 eggs
+
+Set `gramsPerUnit` to enable weight-based macro scaling.
+</Accordion>
+
+## Nutritional Calculations
+
+### How Macros Are Calculated
+
+Fitboard automatically calculates recipe totals and per-serving macros:
+
+**Step 1: Calculate each ingredient's contribution**
+```
+Ingredient Macros = (Macros Per Basis / Basis Amount) × Actual Amount
+```
+
+**Step 2: Sum all ingredients**
+```
+Recipe Total = Sum of all ingredient macros
+```
+
+**Step 3: Divide by servings**
+```
+Per Serving = Recipe Total / Number of Servings
+```
+
+### Example Calculation
+
+Recipe: Protein Smoothie (2 servings)
+
+| Ingredient | Amount | Nutrition Basis | Protein per Basis | Calculation | Protein |
+|------------|--------|-----------------|-------------------|-------------|----------|
+| Whey Protein | 60g | 30g | 24g | (24/30) × 60 | 48g |
+| Banana | 1 unit | 1 unit | 1.3g | (1.3/1) × 1 | 1.3g |
+| Almond Milk | 300ml | 100ml | 0.4g | (0.4/100) × 300 | 1.2g |
+
+**Total Protein**: 50.5g  
+**Per Serving**: 50.5g ÷ 2 = **25.25g**
+
+<Tip>
+Always verify calculations by cross-referencing with trusted nutrition databases like USDA FoodData Central.
+</Tip>
+
+## Organizing Recipes
+
+### Categories
+
+Tag recipes with categories for easy filtering:
+
+```typescript
+{
+  "name": "Chicken Stir Fry",
+  "categoryIds": [
+    "dinner",
+    "high-protein",
+    "quick-meals"
+  ]
+}
+```
+
+**Using Categories:**
+
+1. Create categories in **Settings** → **Categories**
+2. When creating/editing recipes, select relevant categories
+3. Filter recipe list by category in the recipes view
+
+**API Query:**
+```
+GET /api/recipes?category=high-protein&limit=20
+```
+
+### Searching Recipes
+
+Find recipes quickly by name:
+
+```
+GET /api/recipes?q=chicken&sort=-createdAt&page=1&limit=20
+```
+
+Query parameters:
+- `q`: Search by recipe name (case-insensitive)
+- `category`: Filter by category ID
+- `sort`: Order by `name`, `-name`, `createdAt`, or `-createdAt`
+- `page` / `limit`: Pagination
+
+**In the UI:**
+
+Use the search bar at the top of the recipes page to filter by name in real-time.
+
+## Using Recipes in Meals
+
+### Logging Recipe-Based Meals
+
+Once created, use recipes to log meals quickly:
+
+```json
+{
+  "date": "2026-03-04",
+  "slot": "lunch",
+  "recipeId": "65f8a2b3c4d5e6f7g8h9i0j1",
+  "servings": 1.5
+}
+```
+
+**Workflow:**
+
+1. Go to **Meals** → **Add Meal**
+2. Select **From Recipe**
+3. Choose your recipe from the dropdown
+4. Adjust servings (1 = one serving as defined in recipe)
+5. Select date and meal slot
+6. Click **Log Meal**
+
+Macros are automatically calculated based on servings consumed.
+
+### Adjusting Servings
+
+Servings support decimal values for precision:
+
+- `0.5` = Half a serving
+- `1` = One full serving
+- `1.5` = One and a half servings
+- `2` = Two servings
+
+Example: If your "Protein Smoothie" recipe makes 2 servings but you drink the whole thing, log `2` servings.
+
+<Info>
+When you log a recipe-based meal, the original recipe is referenced. If you later update the recipe's ingredients, it **won't** affect already-logged meals.
+</Info>
+
+## Editing Recipes
+
+### Update Recipe Details
+
+Modify any aspect of an existing recipe:
+
+```typescript
+PATCH /api/recipes/:id
+
+{
+  "servings": 4,  // Change from 2 to 4 servings
+  "ingredients": [
+    // Updated ingredient list
+  ]
+}
+```
+
+**Workflow:**
+
+1. Find recipe in your recipes list
+2. Click **Edit**
+3. Modify name, servings, or ingredients
+4. Update category tags
+5. Click **Save Changes**
+
+<Warning>
+Editing a recipe does not update meals previously logged with that recipe. Only future meal logs will use the updated recipe data.
+</Warning>
+
+### Managing Ingredients
+
+**Add new ingredients:**
+- Click **Add Ingredient** in the edit form
+- Fill in details as when creating
+
+**Remove ingredients:**
+- Click the delete icon next to unwanted ingredients
+
+**Reorder ingredients:**
+- Drag and drop ingredients to change order (if supported by UI)
+
+## Sharing Recipes
+
+<Info>
+Recipe sharing features are planned for a future update. Currently, recipes are private to your account.
+</Info>
+
+Future sharing capabilities will include:
+- Share recipes with other Fitboard users
+- Export recipes as JSON or PDF
+- Import recipes from popular formats
+- Community recipe library
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Name recipes descriptively">
+    Use clear names like "High Protein Chicken Bowl" instead of just "Chicken". This makes searching and selection easier.
+  </Accordion>
+  
+  <Accordion title="Set realistic serving counts">
+    Define servings based on how you'll actually divide the recipe. If meal prepping for 5 days, set servings to 5.
+  </Accordion>
+  
+  <Accordion title="Weigh ingredients for accuracy">
+    Use a kitchen scale for precise measurements. "1 cup" varies, but "100g" is exact.
+  </Accordion>
+  
+  <Accordion title="Use consistent nutrition sources">
+    Stick to reliable databases (USDA, food labels) for consistency across your recipe library.
+  </Accordion>
+  
+  <Accordion title="Create recipe templates for meal prep">
+    Save base recipes you make weekly. Adjust ingredients for variety while keeping the structure.
+  </Accordion>
+  
+  <Accordion title="Tag recipes with multiple categories">
+    Use categories like "breakfast," "high-protein," and "quick" for flexible filtering.
+  </Accordion>
+</AccordionGroup>
+
+## Advanced Features
+
+### Unit Conversions
+
+For ingredients measured in units, enable weight-based scaling:
+
+```typescript
+{
+  "name": "Egg",
+  "amount": 3,
+  "unit": "unit",
+  "gramsPerUnit": 50,  // Average egg weight
+  "nutritionBasis": { "amount": 1, "unit": "unit" },
+  "macrosPerBasis": { /* macros for 1 egg */ }
+}
+```
+
+This allows conversion between unit and weight measurements:
+- 3 eggs = 150g total weight
+- Useful for comparing recipes using different measurement systems
+
+### Density Conversions
+
+For liquids, define density to convert ml↔g:
+
+```typescript
+{
+  "name": "Olive Oil",
+  "amount": 15,
+  "unit": "ml",
+  "densityGPerMl": 0.92,  // Oil is less dense than water
+  "nutritionBasis": { "amount": 100, "unit": "ml" },
+  "macrosPerBasis": { /* macros per 100ml */ }
+}
+```
+
+Common densities:
+- Water, milk: ~1.0 g/ml
+- Oils: ~0.9-0.92 g/ml
+- Honey: ~1.4 g/ml
+
+## Data Structure Reference
+
+Complete recipe model from `backend/src/models/Recipe.ts:5`:
+
+```typescript
+interface IRecipe {
+  _id: Types.ObjectId;
+  userId: Types.ObjectId;
+  name: string;
+  date: string;  // Format: YYYY-MM-DD
+  servings: number;  // Minimum: 1
+  ingredients: Ingredient[];
+  categoryIds: Types.ObjectId[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+interface Ingredient {
+  name: string;
+  amount: number;
+  unit: "g" | "ml" | "unit";
+  nutritionBasis: {
+    amount: number;
+    unit: "g" | "ml" | "unit";
+  };
+  macrosPerBasis: {
+    kcal: number;
+    protein: number;
+    carbohydrate: number;
+    fat: number;
+  };
+  gramsPerUnit?: number;
+  densityGPerMl?: number;
+}
+```
+
+## API Reference
+
+### List Recipes
+```http
+GET /api/recipes?page=1&limit=20&q=chicken&category=dinner&sort=-createdAt
+```
+
+### Get Single Recipe
+```http
+GET /api/recipes/:id
+```
+
+### Create Recipe
+```http
+POST /api/recipes
+Content-Type: application/json
+
+{ /* CreateRecipeDto */ }
+```
+
+### Update Recipe
+```http
+PATCH /api/recipes/:id
+Content-Type: application/json
+
+{ /* Partial update data */ }
+```
+
+### Replace Recipe
+```http
+PUT /api/recipes/:id
+Content-Type: application/json
+
+{ /* Full recipe data */ }
+```
+
+### Delete Recipe
+```http
+DELETE /api/recipes/:id
+```
+
+<Warning>
+Deleting a recipe does not delete meals logged with that recipe. Meal logs retain a snapshot of the recipe at the time of logging.
+</Warning>
+
+## Troubleshooting
+
+<AccordionGroup>
+  <Accordion title="Error: 'A recipe with that name already exists'">
+    Recipe names must be unique per user. Choose a different name or delete the existing recipe with that name.
+  </Accordion>
+  
+  <Accordion title="Calculated macros seem incorrect">
+    Verify:
+    - Each ingredient's nutrition basis matches the macro data source
+    - Amounts are in the correct units
+    - Servings count reflects actual portions
+    - No ingredients are duplicated
+  </Accordion>
+  
+  <Accordion title="Can't find recipe when creating meal">
+    Ensure:
+    - Recipe was saved successfully (check recipes list)
+    - You're logged into the same account
+    - Recipe hasn't been deleted
+  </Accordion>
+  
+  <Accordion title="Ingredients won't add to recipe">
+    Check that all required fields are filled:
+    - Name, amount, unit
+    - Nutrition basis amount and unit
+    - All macro values (kcal, protein, carbs, fat)
+  </Accordion>
+</AccordionGroup>
+
+## Related Features
+
+<CardGroup cols={2}>
+  <Card title="Meal Tracking" icon="utensils" href="/features/meals">
+    Use your recipes to log meals quickly
+  </Card>
+  <Card title="Categories" icon="tags" href="/features/categories">
+    Organize recipes with custom categories
+  </Card>
+  <Card title="Macro Goals" icon="bullseye" href="/features/macro-goals">
+    Set targets for recipe planning
+  </Card>
+</CardGroup>
