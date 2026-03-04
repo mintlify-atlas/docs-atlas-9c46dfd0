@@ -1,0 +1,127 @@
+{
+  "projectType": "saas",
+  "projectName": "Fitboard",
+  "projectDescription": "A comprehensive fitness and nutrition tracking platform with meal logging, recipes, workout routines, and progress monitoring.",
+  "theme": "palm",
+  "primaryColor": "#0cecf3",
+  "lightColor": null,
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "authentication"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/meals",
+              "features/recipes",
+              "features/routines",
+              "features/progress"
+            ]
+          },
+          {
+            "group": "Admin",
+            "pages": [
+              "admin/overview",
+              "admin/user-management"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/authentication/register",
+              "api/authentication/login",
+              "api/authentication/logout",
+              "api/authentication/password-reset"
+            ]
+          },
+          {
+            "group": "Users",
+            "pages": [
+              "api/users/get-profile",
+              "api/users/update-profile",
+              "api/users/change-password",
+              "api/users/list-users"
+            ]
+          },
+          {
+            "group": "Meals",
+            "pages": [
+              "api/meals/list-meals",
+              "api/meals/create-meal",
+              "api/meals/get-meal",
+              "api/meals/update-meal",
+              "api/meals/delete-meal",
+              "api/meals/move-meal"
+            ]
+          },
+          {
+            "group": "Recipes",
+            "pages": [
+              "api/recipes/list-recipes",
+              "api/recipes/create-recipe",
+              "api/recipes/get-recipe",
+              "api/recipes/update-recipe",
+              "api/recipes/delete-recipe"
+            ]
+          },
+          {
+            "group": "Routines",
+            "pages": [
+              "api/routines/list-routines",
+              "api/routines/create-routine",
+              "api/routines/get-routine",
+              "api/routines/update-routine",
+              "api/routines/delete-routine"
+            ]
+          },
+          {
+            "group": "Progress",
+            "pages": [
+              "api/progress/list-progress",
+              "api/progress/create-progress",
+              "api/progress/get-progress",
+              "api/progress/update-progress",
+              "api/progress/delete-progress"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Meal logging with macro tracking",
+    "Recipe management and sharing",
+    "Workout routine planning",
+    "Progress tracking and analytics",
+    "User authentication with JWT",
+    "Admin dashboard and user management"
+  ],
+  "publicApiSurface": [
+    "POST /api/v1/register",
+    "POST /api/v1/login",
+    "GET /api/v1/me",
+    "GET /api/v1/meals",
+    "POST /api/v1/meals",
+    "GET /api/v1/recipes",
+    "POST /api/v1/recipes",
+    "GET /api/v1/routines",
+    "POST /api/v1/routines",
+    "GET /api/v1/progress",
+    "POST /api/v1/progress"
+  ]
+}
